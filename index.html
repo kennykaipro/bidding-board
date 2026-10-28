@@ -76,6 +76,7 @@
   .tag.stage-other { background: var(--warn-soft); color: var(--warn); }
   .tag.stage-fix { background: var(--danger-soft); color: var(--danger); }
   .tag.kw { background: #f3f4f6; color: var(--ink-2); }
+  .tag.src { background: #eef2ff; color: #4338ca; }
   .item h3 { margin: 0; font-size: 15px; font-weight: 600; }
   .item a { color: var(--ink); text-decoration: none; }
   .item a:hover { color: var(--brand); text-decoration: underline; }
@@ -131,6 +132,10 @@
       <button class="chip" data-stage="更正公告">更正</button>
       <button class="chip" data-stage="其他">其他</button>
     </div>
+    <div class="group" id="srcGroup" role="group" aria-label="来源筛选">
+      <label>来源</label>
+      <button class="chip active" data-src="all">全部</button>
+    </div>
     <div class="search">
       <input id="q" type="search" placeholder="搜索标题关键词，如：智慧校园、监控、音视频…" aria-label="关键词搜索">
     </div>
@@ -147,7 +152,7 @@
 (function () {
   "use strict";
   var DATA = null;
-  try { DATA = {"generated_at": "2026-10-28 15:02", "window_days": 3, "total": 6, "items": [{"title": "杭州好邦建筑工程咨询有限公司关于计算机网络设备采购项目的公开招标公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/gkzb/202610/t20261028_27575866.htm", "date": "2026-10-28", "stage": "招标公告", "column": "gkzb", "province": "浙江", "matched_keywords": ["网络"]}, {"title": "杭州好邦建筑工程咨询有限公司关于无线网络设备采购项目的公开招标公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/gkzb/202610/t20261028_27575876.htm", "date": "2026-10-28", "stage": "招标公告", "column": "gkzb", "province": "浙江", "matched_keywords": ["网络"]}, {"title": "浙江鼎晟工程项目管理有限公司关于兰溪市“赤松”气象防灾减灾智能体采购项目的竞争性磋商公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/jzxcs/202610/t20261028_27575777.htm", "date": "2026-10-28", "stage": "竞争性磋商", "column": "jzxcs", "province": "浙江", "matched_keywords": ["智能体"]}, {"title": "茂名化州产业园智慧园区建设项目竞争性磋商公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/jzxcs/202610/t20261028_27575462.htm", "date": "2026-10-28", "stage": "竞争性磋商", "column": "jzxcs", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "浙江信镧建设工程咨询有限公司关于浙江省福利彩票管理中心机房动力环境维保项目中标(成交)结果公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/zbgg/202610/t20261028_27575461.htm", "date": "2026-10-28", "stage": "中标公告", "column": "zbgg", "province": "浙江", "matched_keywords": ["机房"]}, {"title": "山东广播电视台融媒体2026-2027品牌展示推介活动重点城市站采购项目结果公告（采购包1）", "url": "http://www.ccgp.gov.cn/cggg/dfgg/qtgg/202610/t20261028_27574900.htm", "date": "2026-10-28", "stage": "其他公告", "column": "qtgg", "province": "山东", "matched_keywords": ["广播"]}], "errors": []}; } catch (e) { DATA = { items: [] }; }
+  try { DATA = {"generated_at": "2026-10-28 15:33", "window_days": 5, "total": 10, "items": [{"title": "南网储能启鸣数智公司2026-2027年数字化能力提升及评价服务、广东电白抽水蓄能电站高压电力设备...", "url": "https://www.bidding.csg.cn/fzbgg/1200447493.jhtml", "date": "2026-10-28", "stage": "采购公告", "buyer": "南方电网储能股份有限公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["数字化"]}, {"title": "广州供电局智能化检测平台建设项目-检测工位环境监测配套设备零星采购零星采购澄清公告", "url": "https://www.bidding.csg.cn/lxcgcqgg/1200447496.jhtml", "date": "2026-10-28", "stage": "零星采购公告", "buyer": "广州供电局", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "广东电力人工智能试验研究院有限公司2026年招聘服务采购零星采购公告", "url": "https://www.bidding.csg.cn/lxcggg/1200447489.jhtml", "date": "2026-10-28", "stage": "零星采购公告", "buyer": "南方电网数字电网集团有限公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["人工智能"]}, {"title": "浙江五石中正工程咨询有限公司关于数字化X线摄影（DR）采购项目的公开招标公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27576075.htm", "date": "2026-10-28", "stage": "招标公告", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "浙江", "matched_keywords": ["数字化"]}, {"title": "浙江鼎晟工程项目管理有限公司关于兰溪市“赤松”气象防灾减灾智能体采购项目的竞争性磋商公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27575777.htm", "date": "2026-10-28", "stage": "竞争性磋商", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "浙江", "matched_keywords": ["智能体"]}, {"title": "台州新远工程项目管理有限公司关于仙居县实验小学人工智能科创实验室的更正公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27575649.htm", "date": "2026-10-28", "stage": "更正公告", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "浙江", "matched_keywords": ["人工智能"]}, {"title": "浙江明达工程造价咨询有限公司关于2026年义乌市污染源自动监控系统非现场监管智改建设项目废标公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27575517.htm", "date": "2026-10-28", "stage": "其他公告", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "浙江", "matched_keywords": ["监控"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智电网传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447354.jhtml", "date": "2026-10-27", "stage": "招标公告", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智运营传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447426.jhtml", "date": "2026-10-27", "stage": "招标公告", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智产业传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447349.jhtml", "date": "2026-10-27", "stage": "招标公告", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}], "errors": [], "sources": [{"key": "ccgp", "name": "中国政府采购网", "kind": "政府"}, {"key": "csg", "name": "南方电网供应链统一服务平台", "kind": "央企"}]}; } catch (e) { DATA = { items: [] }; }
   if (!DATA || !DATA.items) DATA = { items: [] };
 
   var items = DATA.items || [];
@@ -177,7 +182,23 @@
     document.getElementById("updated").textContent = DATA.generated_at || "";
   }
 
-  var state = { prov: "all", stage: "all", q: "" };
+  function renderSources() {
+    var box = document.getElementById("srcGroup");
+    if (!box) return;
+    var seen = {};
+    items.forEach(function (it) {
+      if (it.source && !seen[it.source]) {
+        seen[it.source] = true;
+        var b = document.createElement("button");
+        b.className = "chip";
+        b.setAttribute("data-src", it.source);
+        b.textContent = it.source_name || it.source;
+        box.appendChild(b);
+      }
+    });
+  }
+
+  var state = { prov: "all", stage: "all", src: "all", q: "" };
 
   function esc(s) {
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -195,6 +216,7 @@
     var q = state.q.trim().toLowerCase();
     var shown = items.filter(function (it) {
       if (state.prov !== "all" && it.province !== state.prov) return false;
+      if (state.src !== "all" && it.source !== state.src) return false;
       if (state.stage !== "all") {
         var g = stageGroup(it.stage);
         if (state.stage === "其他") { if (g !== "其他") return false; }
@@ -212,6 +234,7 @@
       var el = document.createElement("article");
       el.className = "item";
       var tags = [];
+      tags.push('<span class="tag src">' + esc(it.source_name || it.source) + '</span>');
       tags.push('<span class="tag prov">' + esc(it.province) + '</span>');
       tags.push('<span class="tag ' + stageClass(it.stage) + '">' + esc(stageGroup(it.stage)) + '</span>');
       (it.matched_keywords || []).slice(0, 4).forEach(function (k) {
@@ -224,10 +247,11 @@
     });
   }
 
+  renderSources();
   document.querySelectorAll(".filters .chip").forEach(function (chip) {
     chip.addEventListener("click", function () {
       var group = chip.parentElement.getAttribute("aria-label");
-      var key = group === "省份筛选" ? "prov" : "stage";
+      var key = group === "省份筛选" ? "prov" : (group === "来源筛选" ? "src" : "stage");
       document.querySelectorAll(".filters .chip").forEach(function (c) {
         if (c.parentElement.getAttribute("aria-label") === group) c.classList.remove("active");
       });
