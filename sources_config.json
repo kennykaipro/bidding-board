@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "_说明": "用户自定义数据源配置。在网页 https://kennykaipro.github.io/bidding-board/admin.html 填写表单可自动生成并提交；也可以直接编辑本文件。解析方式: type=css 用 CSS 选择器(推荐, 使用浏览器F12查看元素)，type=regex 用命名正则。需要登录的网站: 在配置中添加 cookies 字段并联系 Agent 写入本地敏感配置(不要提交到公开仓库)。filter=false 表示不过滤4省+关键词, 全量收录。",
+  "sources": [
+    {
+      "key": "example_gkzb",
+      "name": "中国政府采购网·公开招标(示例)",
+      "kind": "自定义",
+      "list_url": "http://www.ccgp.gov.cn/cggg/dfgg/gkzb/",
+      "page_depth": 1,
+      "page_url_pattern": "",
+      "stage": "招标公告",
+      "filter": true,
+      "parse": {
+        "type": "css",
+        "item": "ul.c_list_bid > li",
+        "title": "a[title]",
+        "date": "",
+        "link": "a[title]",
+        "link_prefix": "http://www.ccgp.gov.cn/cggg/dfgg/gkzb/"
+      }
+    }
+  ]
+}
