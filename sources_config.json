@@ -1,24 +1,17 @@
 {
-  "version": 1,
-  "_说明": "用户自定义数据源配置。在网页 https://kennykaipro.github.io/bidding-board/admin.html 填写表单可自动生成并提交；也可以直接编辑本文件。解析方式: type=css 用 CSS 选择器(推荐, 使用浏览器F12查看元素)，type=regex 用命名正则。需要登录的网站: 在配置中添加 cookies 字段并联系 Agent 写入本地敏感配置(不要提交到公开仓库)。filter=false 表示不过滤4省+关键词, 全量收录。",
-  "sources": [
-    {
-      "key": "example_gkzb",
-      "name": "中国政府采购网·公开招标(示例)",
-      "kind": "自定义",
-      "list_url": "http://www.ccgp.gov.cn/cggg/dfgg/gkzb/",
-      "page_depth": 1,
-      "page_url_pattern": "",
-      "stage": "招标公告",
-      "filter": true,
-      "parse": {
-        "type": "css",
-        "item": "ul.c_list_bid > li",
-        "title": "a[title]",
-        "date": "",
-        "link": "a[title]",
-        "link_prefix": "http://www.ccgp.gov.cn/cggg/dfgg/gkzb/"
-      }
-    }
-  ]
+  "version": 2,
+  "_说明": "看板全局配置：settings(日期范围/阶段多选) + keywords(关键词/类关键词) + sources(数据源)。可在管理页 https://kennykaipro.github.io/bidding-board/admin.html 修改，或直接编辑本文件。需要登录的网站：cookies 写本地敏感配置，不要提交公开仓库。",
+  "settings": {
+    "date_range_days": 7,
+    "stages": []
+  },
+  "keywords": [
+    {"group": "信息化/数字化", "words": ["信息化", "数字化", "政务云", "云计算", "信创", "数据中心", "数据中台", "数据治理", "大数据"]},
+    {"group": "智能化/AI", "words": ["智能化", "人工智能", "智能体", "AI", "大模型", "智慧", "智慧园区", "智慧城市", "智慧校园", "智能"]},
+    {"group": "音视频/多媒体", "words": ["音视频", "音像", "多媒体", "视频会议", "会议系统", "录播", "音响", "广播", "舞台灯光", "声光", "电子显示"]},
+    {"group": "安防监控", "words": ["安防", "监控", "视频", "门禁", "报警", "消防"]},
+    {"group": "显示设备", "words": ["LED", "大屏", "显示屏", "电子屏", "屏幕", "教学一体机", "智慧黑板", "触控一体机", "显示设备"]},
+    {"group": "系统集成/弱电", "words": ["系统集成", "弱电", "机房", "服务器", "网络", "存储", "指挥中心", "调度中心", "综合布线"]}
+  ],
+  "sources": []
 }
