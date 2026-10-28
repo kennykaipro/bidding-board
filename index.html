@@ -39,10 +39,30 @@
   .meta { color: var(--ink-2); font-size: 13px; }
   .admin-link { color: var(--brand); text-decoration: none; font-weight: 600; margin-left: 4px; }
   .admin-link:hover { text-decoration: underline; }
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 14px; }
   .stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 14px; }
   .stat b { display: block; font-size: 24px; color: var(--brand); }
   .stat span { color: var(--ink-2); font-size: 12px; }
+  .insight { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+  .panel h3 { margin: 0 0 12px; font-size: 14px; color: var(--ink-2); display: flex; align-items: center; gap: 6px; }
+  .heat { display: flex; flex-wrap: wrap; gap: 8px; }
+  .hword { cursor: pointer; padding: 5px 11px; border-radius: 999px; font-size: 13px; background: var(--brand-soft); color: var(--brand); border: 1px solid transparent; }
+  .hword .n { opacity: .65; font-size: 11px; margin-left: 3px; }
+  .hword:hover, .hword.on { background: var(--brand); color: #fff; }
+  .hword:hover .n, .hword.on .n { opacity: .85; }
+  .sbars { display: grid; gap: 8px; }
+  .sbar { display: grid; grid-template-columns: 48px 1fr 34px; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); }
+  .sbar .bar { background: #f1f5f9; border-radius: 6px; height: 14px; overflow: hidden; }
+  .sbar .fill { display: block; height: 100%; border-radius: 6px; }
+  .sbar .n { text-align: right; font-variant-numeric: tabular-nums; }
+  .fill.s0 { background: #6366f1; } .fill.s1 { background: #059669; }
+  .fill.s2 { background: #2563eb; } .fill.s3 { background: #be123c; } .fill.s4 { background: #b45309; }
+  .tbars { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+  .tbar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; min-width: 0; }
+  .tbar .col { width: 100%; max-width: 34px; background: linear-gradient(180deg, #3b82f6, #1d4ed8); border-radius: 4px 4px 0 0; min-height: 2px; transition: height .3s ease; }
+  .tbar .lb { font-size: 10px; color: var(--ink-2); white-space: nowrap; transform: rotate(-38deg); transform-origin: bottom left; margin-top: 2px; }
+  .tbar .cnt { font-size: 10px; color: var(--brand); font-weight: 700; }
   .filters {
     background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
     box-shadow: var(--shadow); padding: 14px 16px; margin-bottom: 18px; display: flex;
@@ -74,9 +94,11 @@
   .tags { display: flex; flex-wrap: wrap; gap: 6px; }
   .tag { font-size: 12px; border-radius: 6px; padding: 2px 8px; }
   .tag.prov { background: var(--brand-soft); color: var(--brand); }
+  .tag.stage-gh { background: #eef2ff; color: #4338ca; }
   .tag.stage-tb { background: var(--ok-soft); color: var(--ok); }
-  .tag.stage-other { background: var(--warn-soft); color: var(--warn); }
+  .tag.stage-zb { background: #eff6ff; color: #1d4ed8; }
   .tag.stage-fix { background: var(--danger-soft); color: var(--danger); }
+  .tag.stage-other { background: var(--warn-soft); color: var(--warn); }
   .tag.kw { background: #f3f4f6; color: var(--ink-2); }
   .tag.src { background: #eef2ff; color: #4338ca; }
   .item h3 { margin: 0; font-size: 15px; font-weight: 600; }
@@ -87,6 +109,9 @@
     border: 1px dashed var(--line); border-radius: var(--radius);
   }
   footer { margin-top: 26px; color: var(--ink-2); font-size: 12px; }
+  @media (max-width: 900px) {
+    .insight { grid-template-columns: 1fr; }
+  }
   @media (max-width: 640px) {
     .item { grid-template-columns: 1fr; }
     .item .left { flex-direction: row; flex-wrap: wrap; align-items: center; }
@@ -94,7 +119,7 @@
   }
   @media print {
     body { background: #fff; }
-    .filters, .stats { display: none; }
+    .filters, .stats, .insight { display: none; }
     .item { box-shadow: none; break-inside: avoid; }
   }
 </style>
@@ -104,7 +129,7 @@
   <header class="hero">
     <div>
       <h1>招投标项目情报看板 <span class="accent">· 信息化 / 智能化 / 音视频</span></h1>
-      <div class="meta">数据来源：中国政府采购网 · 南方电网 ｜ 更新：<span id="updated"></span> ｜ 追踪范围：广东 / 浙江 / 江苏 / 山东 ｜ <a class="admin-link" href="https://kennykaipro.github.io/bidding-board/admin.html" target="_blank" rel="noopener noreferrer">＋ 添加数据源</a></div>
+      <div class="meta">更新：<span id="updated"></span> ｜ 设置中心可调日期/阶段/关键词 <a class="admin-link" href="https://kennykaipro.github.io/bidding-board/admin.html" target="_blank" rel="noopener noreferrer">＋ 添加数据源 / 设置</a></div>
     </div>
   </header>
 
@@ -114,6 +139,21 @@
     <div class="stat"><b id="stZj">0</b><span>浙江</span></div>
     <div class="stat"><b id="stJs">0</b><span>江苏</span></div>
     <div class="stat"><b id="stSd">0</b><span>山东</span></div>
+  </section>
+
+  <section class="insight" aria-label="态势感知">
+    <div class="panel">
+      <h3>🔥 热词态势 <span style="font-weight:400;font-size:11px">（点击热词即筛选）</span></h3>
+      <div class="heat" id="heat"></div>
+    </div>
+    <div class="panel">
+      <h3>🧩 阶段分布 <span style="font-weight:400;font-size:11px">（规划→招标→中标 全流程）</span></h3>
+      <div class="sbars" id="sbars"></div>
+    </div>
+    <div class="panel">
+      <h3>📈 每日动态</h3>
+      <div class="tbars" id="tbars"></div>
+    </div>
   </section>
 
   <section class="filters" aria-label="筛选">
@@ -128,10 +168,10 @@
     <div class="group" role="group" aria-label="阶段筛选">
       <label>阶段</label>
       <button class="chip active" data-stage="all">全部</button>
-      <button class="chip" data-stage="招标公告">招标</button>
-      <button class="chip" data-stage="中标公告">中标</button>
-      <button class="chip" data-stage="成交公告">成交</button>
-      <button class="chip" data-stage="更正公告">更正</button>
+      <button class="chip" data-stage="规划">规划/前期</button>
+      <button class="chip" data-stage="招标">招标/采购</button>
+      <button class="chip" data-stage="中标">中标/成交</button>
+      <button class="chip" data-stage="更正">更正/澄清</button>
       <button class="chip" data-stage="其他">其他</button>
     </div>
     <div class="group" id="srcGroup" role="group" aria-label="来源筛选">
@@ -147,35 +187,30 @@
   <div class="list" id="list" aria-live="polite"></div>
   <div class="empty" id="empty" hidden>没有符合条件的项目，换个筛选条件试试。</div>
 
-  <footer>本看板数据由程序每日自动抓取生成，仅供业务线索参考；以中国政府采购网原文为准。</footer>
+  <footer>本看板数据由程序每日自动抓取生成，仅供业务线索参考；以各平台原文为准。</footer>
 </div>
 
 <script>
 (function () {
   "use strict";
   var DATA = null;
-  try { DATA = {"generated_at": "2026-10-28 16:40", "window_days": 3, "total": 7, "items": [{"title": "南网储能启鸣数智公司2026-2027年数字化能力提升及评价服务、广东电白抽水蓄能电站高压电力设备...", "url": "https://www.bidding.csg.cn/fzbgg/1200447493.jhtml", "date": "2026-10-28", "stage": "采购公告", "buyer": "南方电网储能股份有限公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["数字化"]}, {"title": "2026-2027年度扬州市政务信息化项目监理服务采购征集公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27577208.htm", "date": "2026-10-28", "stage": "招标公告", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "江苏", "matched_keywords": ["信息化"]}, {"title": "连云港市G228赣榆段交通安全设施精细化提升工程（智慧交安）（政府采购工程）（专门面向中小企业）成交公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27577626.htm", "date": "2026-10-28", "stage": "成交公告", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "江苏", "matched_keywords": ["智慧"]}, {"title": "浙江祥泽招标代理有限公司关于育青中学智慧体育系统采购项目的更正公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27576875.htm", "date": "2026-10-28", "stage": "更正公告", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "浙江", "matched_keywords": ["智慧"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智电网传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447354.jhtml", "date": "2026-10-27", "stage": "招标公告", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智运营传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447426.jhtml", "date": "2026-10-27", "stage": "招标公告", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智产业传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447349.jhtml", "date": "2026-10-27", "stage": "招标公告", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}], "errors": ["https://www.bidding.csg.cn/lxcggg/: HTTP Error 404: Not Found"], "sources": [{"key": "ccgp", "name": "中国政府采购网", "kind": "政府"}, {"key": "csg", "name": "南方电网供应链统一服务平台", "kind": "央企"}, {"key": "example_gkzb", "name": "中国政府采购网·公开招标(示例)", "kind": "自定义"}]}; } catch (e) { DATA = { items: [] }; }
+  try { DATA = {"generated_at": "2026-10-28 17:45", "window_days": 7, "settings": {"date_range_days": 7, "stages": []}, "total": 76, "items": [{"title": "南网储能启鸣数智公司2026-2027年数字化能力提升及评价服务、广东电白抽水蓄能电站高压电力设备...", "url": "https://www.bidding.csg.cn/fzbgg/1200447493.jhtml", "date": "2026-10-28", "stage": "其他", "buyer": "南方电网储能股份有限公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["数字化"]}, {"title": "2026年南方电网数据平台与安全（广东）有限公司数据治理年会暨博览会展位租赁服务项目直接采购公示", "url": "https://www.bidding.csg.cn/zbhxrgs/1200447504.jhtml", "date": "2026-10-28", "stage": "招标", "buyer": "南方电网数据平台与安全（广东）有限公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["数据治理"]}, {"title": "浙江巨昇工程咨询管理有限公司关于仙居县下各第二中学智能作业批阅系统等设施设备采购的公开招标公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27578941.htm", "date": "2026-10-28", "stage": "招标", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "浙江", "matched_keywords": ["智能"]}, {"title": "浙江致信招标代理有限公司关于浙江工商职业技术学院2026年度计算中心机房实验室建设中标(成交)结果公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27579106.htm", "date": "2026-10-28", "stage": "中标", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "浙江", "matched_keywords": ["机房"]}, {"title": "浙江省国际技术设备招标有限公司关于浙江警官职业学院智能消防产教融合实训平台中标(成交)结果公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27578668.htm", "date": "2026-10-28", "stage": "中标", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "浙江", "matched_keywords": ["智能", "消防"]}, {"title": "泰州实验中学新建教学楼宿舍楼及生活设施项目录播设备采购更正公告", "url": "http://www.ccgp.gov.cn/cggg/dfgg/202610/t20261028_27578669.htm", "date": "2026-10-28", "stage": "更正", "source": "ccgp", "source_name": "中国政府采购网", "source_kind": "政府", "province": "江苏", "matched_keywords": ["录播"]}, {"title": "深圳市宝安区西湾学校、深圳大学附属中学宝安学校网络考试实验室设备采购项目（B）招标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261027/70ea14ea-8c73-4592-8d73-8fee044c728e.html", "date": "2026-10-27", "stage": "招标", "area": "宝安区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["网络"]}, {"title": "深圳市宝安区西湾学校、深圳大学附属中学宝安学校网络考试实验室设备采购项目（A）招标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261027/08f2d64b-3c48-48d2-b50b-c4f48cb06239.html", "date": "2026-10-27", "stage": "招标", "area": "宝安区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["网络"]}, {"title": "深圳鹏城技师学院2026年智慧城市学院物联网应用技术专业实训工作站采购项目（A）招标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261027/33cc7d08-0cc4-4428-8fbb-2545908e0a2a.html", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深圳职业技术大学智能制造技术研究院与集成电路关键材料研究院新实验场地改造修缮工程招标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261027/0378f94b-f74e-4490-b365-b9f419e99c22.html", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能"]}, {"title": "香港中文大学（深圳）医院配套医疗设备及信息化（一期）主生产数据中心设施项目（A）招标公告(重新采购第1次)", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261027/01f4ba3b-8a31-4f7c-8daf-58bb23c56c0b.html", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "深圳市卫生医疗机构电子政务与五权管理系统运维服务——信创项目的采购公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["信创"]}, {"title": "深圳市新华医院药房麻精智能药柜采购项目的采购公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能"]}, {"title": "深圳市福田区深圳中学梅香学校（小学部）教学楼监控采购项目的采购公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "招标", "area": "福田区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["监控"]}, {"title": "关于深圳市气象局2026年度精准预报业务系统政务信息化运维服务项目的采购失败公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001008/002001008003/20261027/444c50f6-2548-40af-afc1-a19639af68db.html", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "【延续合同】深圳市龙华区卫生健康局智慧医疗“114工程”区域医院智慧服务4级水平建设项目2025年运维服务合同公示", "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002001/20261027/d9a1f3fb-6f1b-498c-b26d-17d410ff65cd.html", "date": "2026-10-27", "stage": "其他", "area": "龙华区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深圳市政务服务和数据管理局深圳市数字政府人工智能公共支撑平台运营服务项目（2026年）意向公开", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001001/002001001002/20261027/9ca5ec58-f5d2-4283-8db0-19eb077f386d.html", "date": "2026-10-27", "stage": "规划", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["人工智能"]}, {"title": "深圳市龙华外国语高级中学数智作业与智能批改学情分析项目的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "龙华区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能"]}, {"title": "【初始合同】北京大学深圳医院全院弱电动环建设项目合同公示", "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002001/20261027/1d92977e-d665-4005-a7ef-6d4db28dc7a0.html", "date": "2026-10-27", "stage": "其他", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["弱电"]}, {"title": "【初始合同】北京大学深圳医院通用服务器采购项目合同公示", "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002001/20261027/3bfaefed-0bf5-484e-a85d-291e2f057c35.html", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["服务器"]}, {"title": "深圳市龙华区政务服务和数据管理局“智慧龙华”数据中心机柜托管租用服务项目意向公开", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001001/002001001002/20261027/24ec216f-a1f7-4676-82a2-e53ec6d872e4.html", "date": "2026-10-27", "stage": "规划", "area": "龙华区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["数据中心", "智慧"]}, {"title": "深圳市龙岗区深圳大学附属坂田学校AI个性化学习服务采购项目的采购公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "招标", "area": "龙岗区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["AI"]}, {"title": "关于深圳医学科学院冷冻电镜单颗粒数据处理及存储系统采购项目的采购失败公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["存储"]}, {"title": "深圳坪山综合保税区信息化系统及相关设备运维服务项目合同公示", "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002002/20261027/e481eb8b-0ab0-4879-8190-d941abd59b38.html", "date": "2026-10-27", "stage": "其他", "area": "坪山区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "深圳湾学校AI智学社区项目的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "南山区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["AI"]}, {"title": "深圳市财政局网络线路租赁服务项目（2026 年）（重新招标） 中标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001004/002001004001/20261027/35cfb1f7-1e08-496a-afe0-4ded0aeb9ebc.html", "date": "2026-10-27", "stage": "中标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["网络"]}, {"title": "深圳市血液中心市卫生健康委数据治理服务项目（2026年）意向公开", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001001/002001001002/20261027/4ba26227-8578-4419-a08a-35f0e3c3d049.html", "date": "2026-10-27", "stage": "规划", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["数据治理"]}, {"title": "关于深圳市公安局罗湖分局监控设备采购项目的更正公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "更正", "area": "罗湖区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["监控"]}, {"title": "北京大学深圳研究生院高性能服务器竞价采购竞价公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261027/0e85306f-5c5f-4367-9cf7-13ae1043ffca.html", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["服务器"]}, {"title": "深圳市大数据资源管理中心2027年坂田数据中心与梅林数据中心物业管理服务项目意向公开", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001001/002001001002/20261027/e28d63af-a7e3-41b7-b597-f63163f85979.html", "date": "2026-10-27", "stage": "规划", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["数据中心"]}, {"title": "【延续合同】深圳市宝安区西乡街道办事处智慧宝安管控指挥西乡分中心运营总体服务（2024年）项目合同公示", "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002001/20261027/34fbf966-5342-4e59-b436-51ca4bc3e37a.html", "date": "2026-10-27", "stage": "其他", "area": "宝安区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深圳医学科学院Token智能服务采购项目（第二次）的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能"]}, {"title": "深圳市龙岗区第二高级中学AI智学采购项目的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "龙岗区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["AI"]}, {"title": "深圳市商务局政务信息系统网络安全运营（2026年）项目的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["网络"]}, {"title": "关于北京大学深圳医院电梯机房增加视频监控设备的采购失败公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["监控", "机房"]}, {"title": "【初始合同】深圳市委政法委政务信息系统运营（信息网络安全部分）项目合同公示", "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002001/20261027/528b8061-14a9-4c79-8af2-119b52fe19e8.html", "date": "2026-10-27", "stage": "其他", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["网络"]}, {"title": "香港大学深圳医院（二期）开办首批（安防设备设施）采购项目中标（成交）结果公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001004/002001004001/20261027/6c4d4ec7-8919-451b-8ee4-3856b8026661.html", "date": "2026-10-27", "stage": "中标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["安防"]}, {"title": "深圳市深汕人民医院机房及网络系统建设项目招标失败公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001008/002001008003/20261027/71ee7fac-1a20-4e46-acfd-d3e6873efef1.html", "date": "2026-10-27", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["机房"]}, {"title": "关于深圳市龙岗区深圳大学附属坂田学校智慧教室建设的更正公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "更正", "area": "龙岗区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深圳市前海蛇口自贸区医院UPS不间断电源智慧化安全管理服务的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "南山区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "【初始合同】深圳职业技术大学深汕校区（信息化）信创数据库项目合同公示", "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002001/20261027/bd91dc46-6e38-4f3b-896c-411bc8e5da74.html", "date": "2026-10-27", "stage": "其他", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "深圳福田新沙项目01地块智能化工程中标结果公示", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "福田区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深圳福田新沙项目01地块智能化工程定标结果公示", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "福田区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深国际智慧物流港|佛山·高明5#倒班楼三层303房招租-结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市外", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深国际智慧物流港|肇庆综合楼3层304宿舍招租公告-结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市外", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深国际智慧物流港|肇庆综合楼2层201宿舍招租公告-结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市外", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深国际智慧物流港|肇庆综合楼2层202宿舍招租公告-结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市外", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深国际智慧物流港|肇庆综合楼2层204宿舍招租公告-结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市外", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深国际智慧物流港|肇庆综合楼2层210宿舍招租公告-结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市外", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深国际智慧物流港|肇庆综合楼2层217宿舍招租公告-结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-27", "stage": "中标", "area": "市外", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智电网传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447354.jhtml", "date": "2026-10-27", "stage": "规划", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智运营传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447426.jhtml", "date": "2026-10-27", "stage": "规划", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "广东电网有限责任公司2026-2027年四个数智信息化项目框架采购（数智产业传统可研类项目）招标公告", "url": "https://www.bidding.csg.cn/zbgg/1200447349.jhtml", "date": "2026-10-27", "stage": "规划", "buyer": "广东电网公司", "source": "csg", "source_name": "南方电网供应链统一服务平台", "source_kind": "央企", "province": "广东", "matched_keywords": ["信息化"]}, {"title": "深圳鹏城技师学院智能网联汽车测试实训室建设项目（A）招标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261026/7e20fbfc-761c-4dc1-832d-9a02b94a504e.html", "date": "2026-10-26", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能"]}, {"title": "深圳鹏城技师学院无线网络CSI感知建设项目（A）招标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261026/000fda4f-5a52-45f4-a34e-ed1a47f81f6a.html", "date": "2026-10-26", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["网络"]}, {"title": "第十个“深圳人才日”主题歌曲视频的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "中标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["视频"]}, {"title": "深圳大学城图书馆信息化系统基础硬件设施升级改造项目-超融合服务器采购（A）招标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261026/10d833ad-a96c-486e-bb0d-761ee3b9cbe8.html", "date": "2026-10-26", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["信息化", "服务器"]}, {"title": "深圳信息职业技术大学AIGC内容创作中心项目（A）招标公告", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261026/c6605c61-cd21-49bd-ad87-809ee840ccd9.html", "date": "2026-10-26", "stage": "招标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["AI"]}, {"title": "深圳市高级中学创新高中AI自习室建设项目的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "中标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["AI"]}, {"title": "深圳市高级中学理慧高中AI自习室建设项目的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "中标", "area": "市本级", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["AI"]}, {"title": "深圳市龙岗区深圳大学附属坂田学校智慧教室建设的采购结果公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "中标", "area": "龙岗区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深圳市深汕特别合作区海洋综合执法大队渔船渔港智慧监管系统机库部署服务项目的采购公告", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "招标", "area": "深汕特别合作区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深圳市宝安区人民医院整体改造工程(二期)配套医疗设备购置、信息化建设及首次开办配置项目信息化工程部分-智慧后勤项目（A）招标公告(重新采购第1次)", "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261026/2b43b49f-43b7-4728-adfd-051fac4bf728.html", "date": "2026-10-26", "stage": "招标", "area": "宝安区", "channel": "政府采购", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["信息化", "智慧"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程最高投标限价", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "其他", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程招标文件技术标部分变更", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "更正", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程招标控制价变更", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "更正", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程招标文件清单变更", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "更正", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程招标文件附件变更", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "更正", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深国际智慧物流港·深圳|坪山A04厂房-1层厂房-6区夹层1等6宗资产合计944.29㎡自行公开招租", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "其他", "area": "坪山区", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智慧"]}, {"title": "深圳市罗湖区东晓街道办事处一批闲置监控设备", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-26", "stage": "其他", "area": "", "channel": "产权交易", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["监控"]}, {"title": "深圳市赛美科技园11号厂房、11号厂房旁附属建筑（共二层）、12号厂房、B栋3至4层及1层消防水箱房、附属用地及公共区域用地", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-23", "stage": "其他", "area": "宝安区", "channel": "集体企业要素", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["消防"]}, {"title": "深圳平湖南至盐田港铁路改造工程四电系统集成及站后工程（房建工区）综合检测中标结果公示", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-22", "stage": "中标", "area": "市本级", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["系统集成"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程【已变更】", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-22", "stage": "更正", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程公告变更", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-22", "stage": "更正", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程招标文件附件变更", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-22", "stage": "更正", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}, {"title": "深圳市龙岗中等专业学校迁址重建工程（深圳市龙岗职业技术学校）智能化专业承包工程截标时间变更", "url": "https://www.szggzy.com/xxgk/", "date": "2026-10-22", "stage": "更正", "area": "龙岗区", "channel": "建设工程", "source": "szggzy", "source_name": "深圳公共资源交易中心", "source_kind": "政府", "province": "广东", "matched_keywords": ["智能化"]}], "errors": [{"error": "https://www.bidding.csg.cn/zbcg/: HTTP Error 404: Not Found"}], "sources": [{"key": "ccgp", "name": "中国政府采购网", "kind": "政府"}, {"key": "csg", "name": "南方电网供应链统一服务平台", "kind": "央企"}, {"key": "szggzy", "name": "深圳公共资源交易中心", "kind": "政府"}]}; } catch (e) { DATA = { items: [] }; }
   if (!DATA || !DATA.items) DATA = { items: [] };
 
   var items = DATA.items || [];
   var provMap = { "广东": "stGd", "浙江": "stZj", "江苏": "stJs", "山东": "stSd" };
+  var STAGE_ORDER = ["规划", "招标", "中标", "更正", "其他"];
 
   function stageClass(stage) {
-    if (stage === "招标公告" || stage === "竞争性磋商" || stage === "竞争性谈判") return "stage-tb";
-    if (stage === "中标公告" || stage === "成交公告") return "stage-tb";
-    if (stage === "更正公告") return "stage-fix";
-    return "stage-other";
+    var map = { "规划": "stage-gh", "招标": "stage-tb", "中标": "stage-zb", "更正": "stage-fix", "其他": "stage-other" };
+    return map[stage] || "stage-other";
   }
   function stageGroup(stage) {
-    if (stage === "招标公告" || stage === "竞争性磋商" || stage === "竞争性谈判") return "招标";
-    if (stage === "中标公告" || stage === "成交公告") return "中标/成交";
-    if (stage === "更正公告") return "更正";
-    return "其他";
+    return STAGE_ORDER.indexOf(stage) >= 0 ? stage : "其他";
   }
 
   function renderStats() {
-    var total = items.length;
-    document.getElementById("stTotal").textContent = total;
+    document.getElementById("stTotal").textContent = items.length;
     var counts = { "广东": 0, "浙江": 0, "江苏": 0, "山东": 0 };
     items.forEach(function (it) { if (counts[it.province] !== undefined) counts[it.province]++; });
     Object.keys(counts).forEach(function (p) {
@@ -200,10 +235,70 @@
     });
   }
 
+  function buildInsight() {
+    // 热词
+    var kw = {};
+    items.forEach(function (it) {
+      (it.matched_keywords || []).forEach(function (k) { kw[k] = (kw[k] || 0) + 1; });
+    });
+    var top = Object.keys(kw).map(function (k) { return { k: k, n: kw[k] }; })
+      .sort(function (a, b) { return b.n - a.n; }).slice(0, 14);
+    var heat = document.getElementById("heat");
+    heat.innerHTML = "";
+    if (!top.length) { heat.innerHTML = '<span style="color:var(--ink-2);font-size:12px">暂无关键词命中</span>'; }
+    top.forEach(function (t) {
+      var s = document.createElement("span");
+      s.className = "hword";
+      s.textContent = t.k;
+      var n = document.createElement("span"); n.className = "n"; n.textContent = t.n;
+      s.appendChild(n);
+      s.addEventListener("click", function () {
+        state.q = t.k;
+        document.getElementById("q").value = t.k;
+        document.querySelectorAll(".hword").forEach(function (h) { h.classList.remove("on"); });
+        s.classList.add("on");
+        render();
+      });
+      heat.appendChild(s);
+    });
+    // 阶段分布
+    var sc = {};
+    items.forEach(function (it) { var g = stageGroup(it.stage); sc[g] = (sc[g] || 0) + 1; });
+    var max = 1;
+    STAGE_ORDER.forEach(function (s) { if ((sc[s] || 0) > max) max = sc[s]; });
+    var sbars = document.getElementById("sbars");
+    sbars.innerHTML = "";
+    STAGE_ORDER.forEach(function (s, i) {
+      var v = sc[s] || 0;
+      var d = document.createElement("div"); d.className = "sbar";
+      d.innerHTML = '<span>' + s + '</span><div class="bar"><span class="fill s' + i + '" style="width:' + Math.round(v / max * 100) + '%"></span></div><span class="n">' + v + '</span>';
+      sbars.appendChild(d);
+    });
+    // 每日趋势
+    var dc = {};
+    items.forEach(function (it) {
+      var dt = (it.date || "").slice(0, 10);
+      if (dt) dc[dt] = (dc[dt] || 0) + 1;
+    });
+    var days = Object.keys(dc).sort();
+    var cap = Math.min(days.length, 14);
+    days = days.slice(-cap);
+    var dmax = 1;
+    days.forEach(function (d) { if (dc[d] > dmax) dmax = dc[d]; });
+    var tbars = document.getElementById("tbars");
+    tbars.innerHTML = "";
+    days.forEach(function (d) {
+      var v = dc[d];
+      var bar = document.createElement("div"); bar.className = "tbar";
+      bar.innerHTML = '<span class="cnt">' + v + '</span><span class="col" style="height:' + Math.max(6, Math.round(v / dmax * 100)) + '%"></span><span class="lb">' + d.slice(5) + '</span>';
+      tbars.appendChild(bar);
+    });
+  }
+
   var state = { prov: "all", stage: "all", src: "all", q: "" };
 
   function esc(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
   function highlight(title, q) {
@@ -219,11 +314,7 @@
     var shown = items.filter(function (it) {
       if (state.prov !== "all" && it.province !== state.prov) return false;
       if (state.src !== "all" && it.source !== state.src) return false;
-      if (state.stage !== "all") {
-        var g = stageGroup(it.stage);
-        if (state.stage === "其他") { if (g !== "其他") return false; }
-        else if (g !== state.stage && it.stage !== state.stage) return false;
-      }
+      if (state.stage !== "all" && stageGroup(it.stage) !== state.stage) return false;
       if (q && it.title.toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
@@ -237,7 +328,7 @@
       el.className = "item";
       var tags = [];
       tags.push('<span class="tag src">' + esc(it.source_name || it.source) + '</span>');
-      tags.push('<span class="tag prov">' + esc(it.province) + '</span>');
+      tags.push('<span class="tag prov">' + esc(it.province || "其他") + '</span>');
       tags.push('<span class="tag ' + stageClass(it.stage) + '">' + esc(stageGroup(it.stage)) + '</span>');
       (it.matched_keywords || []).slice(0, 4).forEach(function (k) {
         tags.push('<span class="tag kw">' + esc(k) + '</span>');
@@ -265,10 +356,12 @@
 
   document.getElementById("q").addEventListener("input", function () {
     state.q = this.value;
+    document.querySelectorAll(".hword").forEach(function (h) { h.classList.remove("on"); });
     render();
   });
 
   renderStats();
+  buildInsight();
   render();
 })();
 </script>
