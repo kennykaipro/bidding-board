@@ -1,0 +1,67 @@
+{
+  "biddingSites": [
+    {
+      "siteId": "site001",
+      "siteName": "示例招投标平台",
+      "siteType": "bidding",
+      "listUrl": "shturl.cc/Vq6HCEURXt",
+      "isDynamic": false,
+      "cookie": "",
+      "listSelector": ".list-item",
+      "titleSelector": ".title a",
+      "publishDateSelector": ".date",
+      "regionSelector": ".area",
+      "stageSelector": ".stage-tag",
+      "detailLinkSelector": ".title a",
+      "detailRule": {
+        "budgetSelector": ".budget",
+        "purchaserSelector": ".purchaser",
+        "agentSelector": ".agent",
+        "deadlineSelector": ".deadline",
+        "contentSelector": ".detail-content"
+      },
+      "pagination": {
+        "enable": true,
+        "nextPageSelector": ".next-page:not(.disabled)",
+        "maxPage": 50
+      },
+      "enable": true,
+      "remark": "这里备注，比如：广东政府采购网"
+    }
+  ],
+  "mediaSites": [
+    {
+      "siteId": "media001",
+      "siteName": "示例权威媒体",
+      "siteType": "media",
+      "listUrl": "shturl.cc/1Q6dmCrVTk",
+      "isDynamic": false,
+      "cookie": "",
+      "listSelector": ".news-item",
+      "titleSelector": ".news-title a",
+      "publishDateSelector": ".news-time",
+      "sourceSelector": ".source-name",
+      "detailLinkSelector": ".news-title a",
+      "detailRule": {
+        "summarySelector": ".news-summary"
+      },
+      "pagination": {
+        "enable": true,
+        "nextPageSelector": ".next:not(.disable)",
+        "maxPage": 30
+      },
+      "enable": true,
+      "remark": "官媒/行业资讯网站"
+    }
+  ],
+  "mediaKeywordList": [
+    {
+      "groupName": "算力基建组",
+      "keywords": ["算力", "智算中心", "数据中心", "算力枢纽"]
+    },
+    {
+      "groupName": "新能源组",
+      "keywords": ["光伏", "储能", "风电", "新能源基建"]
+    }
+  ]
+}
