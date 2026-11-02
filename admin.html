@@ -120,8 +120,10 @@
     <h2><span class="emoji">💾</span> 保存全部设置</h2>
     <div class="row">
       <button class="btn btn-primary" id="btnSave">保存到 GitHub 并生效</button>
-      <span class="hint">需要你的 GitHub Token（只存本浏览器，自动记住可选）</span>
+      <input type="password" id="tokenInput" placeholder="GitHub Token（ghp_ 开头，粘贴在此）" style="flex:1;min-width:220px;max-width:360px" autocomplete="off">
+      <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="rememberToken" checked> 记住</label>
     </div>
+    <div class="hint" style="margin-bottom:4px">Token 只保存在本浏览器，不会上传到仓库。首次使用请在上方输入框粘贴你的 GitHub classic Token（需勾选 repo 权限）；记住后可免输入。</div>
     <div class="msg" id="saveMsg"></div>
   </section>
 
@@ -145,6 +147,12 @@
         renderAll();
       })
       .catch(function () { renderAll(); });
+  }
+
+  function initTokenHint() {
+    if (localStorage.getItem("gh_token_bidding")) {
+      $("tokenInput").placeholder = "已记住 Token，直接点保存即可（要换 Token 就粘贴新的）";
+    }
   }
 
   function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -236,38 +244,84 @@
   function renderAll() { renderSettings(); renderKeywords(); renderSources(); }
 
   // ---- 保存 ----
+  function showMsg(cls, text) {
+    $("saveMsg").className = "msg " + cls;
+    $("saveMsg").style.display = "block";
+    $("saveMsg").textContent = text;
+  }
+  function readToken() {
+    var t = $("tokenInput").value.trim();
+    if (t) return t;
+    return localStorage.getItem("gh_token_bidding") || "";
+  }
+  function describeGhError(status) {
+    if (status === 401) return "Token 无效或已过期，请检查是否复制完整（ghp_ 开头）";
+    if (status === 403) return "Token 权限不足：需要勾选 repo 权限的 classic token（设置页面重新生成时勾选 repo）";
+    if (status === 404) return "仓库配置未找到：请确认仓库 kennykaipro/bidding-board 与分支 main 存在";
+    if (status === 409) return "配置刚被其他操作修改，请重试一次";
+    return "GitHub 返回错误（HTTP " + status + "），请重试或换一个 Token";
+  }
   $("btnSave").addEventListener("click", function () {
-    var token = localStorage.getItem("gh_token_bidding") || "";
+    var token = readToken();
     if (!token) {
-      token = prompt("请输入你的 GitHub Token（用于写入仓库配置；只在本浏览器使用）：");
-      if (!token) return;
-      var remember = confirm("记住 Token 在本浏览器？(下次免输入)");
-      if (remember) { try { localStorage.setItem("gh_token_bidding", token); } catch (e) {} }
+      showMsg("err", "请先在上方输入框粘贴 GitHub Token（ghp_ 开头），或先保存一次让浏览器记住。");
+      $("tokenInput").focus();
+      return;
     }
     // 日期
     if ($("dateSel").value === "-1") cfg.settings.date_range_days = Math.max(1, parseInt($("customDays").value || "7", 10) || 7);
     else cfg.settings.date_range_days = parseInt($("dateSel").value, 10);
     var payload = JSON.stringify({ version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources }, null, 2);
     $("btnSave").disabled = true;
-    $("saveMsg").className = "msg"; $("saveMsg").style.display = "block";
-    $("saveMsg").textContent = "正在保存…";
-    fetch("https://api.github.com/repos/" + REPO + "/contents/" + FILE + "?ref=" + BRANCH, {
-      headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" }
-    }).then(function (r) { return r.json(); }).then(function (meta) {
-      if (!meta.sha) throw new Error("读取仓库配置失败，请检查 Token 权限（需要 repo 权限）");
-      return fetch("https://api.github.com/repos/" + REPO + "/contents/" + FILE, {
-        method: "PUT",
-        headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json", "Content-Type": "application/json" },
-        body: JSON.stringify({ message: "feat: 更新看板设置", content: btoa(unescape(encodeURIComponent(payload))), sha: meta.sha, branch: BRANCH })
-      });
-    }).then(function (r) { return r.json(); }).then(function (res) {
-      if (res.commit) {
-        $("saveMsg").className = "msg ok"; $("saveMsg").textContent = "保存成功 ✅ 已生效，下一次每日自动抓取将按新设置运行；想立即看效果可告诉 Agent「试抓一次」。";
-      } else { $("saveMsg").className = "msg err"; $("saveMsg").textContent = "保存失败：" + (res.message || "未知错误"); }
-    }).catch(function (e) { $("saveMsg").className = "msg err"; $("saveMsg").textContent = "保存失败：" + e.message; })
-    .finally(function () { $("btnSave").disabled = false; });
+    showMsg("", "正在保存…");
+    // 1) 预校验 Token（请求当前用户，快速暴露 401/403）
+    fetch("https://api.github.com/user", { headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" } })
+      .then(function (r) {
+        if (!r.ok) { throw { status: r.status }; }
+        return r.json();
+      })
+      .then(function (user) {
+        // 2) 读取配置 sha
+        return fetch("https://api.github.com/repos/" + REPO + "/contents/" + FILE + "?ref=" + BRANCH, {
+          headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" }
+        }).then(function (r) {
+          if (!r.ok) { throw { status: r.status }; }
+          return r.json();
+        }).then(function (meta) {
+          if (!meta.sha) { throw { status: 404 }; }
+          // 3) 写入
+          return fetch("https://api.github.com/repos/" + REPO + "/contents/" + FILE, {
+            method: "PUT",
+            headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json", "Content-Type": "application/json" },
+            body: JSON.stringify({ message: "feat: 更新看板设置", content: btoa(unescape(encodeURIComponent(payload))), sha: meta.sha, branch: BRANCH })
+          });
+        });
+      })
+      .then(function (r) {
+        if (!r.ok) { throw { status: r.status }; }
+        return r.json();
+      })
+      .then(function (res) {
+        if (res.commit) {
+          // 保存成功，按需记住 Token
+          var inp = $("tokenInput").value.trim();
+          if (inp && $("rememberToken").checked) {
+            try { localStorage.setItem("gh_token_bidding", inp); } catch (e) {}
+            $("tokenInput").value = "";
+          }
+          showMsg("ok", "保存成功 ✅ 已生效，下一次每日自动抓取将按新设置运行；想立即看效果可告诉 Agent「试抓一次」。");
+        } else {
+          showMsg("err", "保存失败：" + ((res && res.message) || "未知错误"));
+        }
+      })
+      .catch(function (e) {
+        if (e && e.status) { showMsg("err", "保存失败：" + describeGhError(e.status)); }
+        else { showMsg("err", "保存失败：" + (e && e.message ? e.message : "网络异常，请检查网络后重试")); }
+      })
+      .finally(function () { $("btnSave").disabled = false; });
   });
 
+  initTokenHint();
   load();
 })();
 </script>
