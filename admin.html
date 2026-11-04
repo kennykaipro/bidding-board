@@ -101,19 +101,72 @@
 
   <section class="card">
     <h2><span class="emoji">🌐</span> 数据源</h2>
-    <div class="note" style="margin-bottom:12px">内置源：中国政府采购网、南方电网、深圳公共资源交易中心。下面是你的自定义网站。</div>
+    <div class="note" style="margin-bottom:12px">内置源（无需配置）：中国政府采购网、南方电网、深圳公共资源交易中心。下面是你的自定义网站，填完保存即生效，无需联系 Agent。</div>
     <div id="srcList"></div>
     <div style="margin-top:12px">
       <div class="grid">
-        <div class="field"><label>网站名称</label><input id="fName" placeholder="如：某市公共资源交易网"></div>
-        <div class="field"><label>列表页 URL</label><input id="fUrl" placeholder="https://example.com/zbgg/"></div>
-        <div class="field full"><label>解析规则（可选，不会写可留空）</label><input id="fSel" placeholder="条目选择器：ul.list > li（留空则由 Agent 帮你探测配置）"></div>
+        <div class="field"><label>网站名称 *</label><input id="fName" placeholder="如：某市公共资源交易网"></div>
+        <div class="field"><label>列表页 URL *</label><input id="fUrl" placeholder="https://example.com/zbgg/"></div>
+        <div class="field"><label>解析方式</label>
+          <select id="fType">
+            <option value="css">CSS 选择器（网页列表）</option>
+            <option value="regex">正则表达式（网页列表）</option>
+            <option value="api_json">JSON 接口（网站有 API）</option>
+          </select>
+        </div>
+        <div class="field"><label>阶段标注</label><input id="fStage" placeholder="公告（可选，如：招标公告）"></div>
       </div>
+
+      <details style="margin:10px 0;border:1px solid var(--line);border-radius:10px;padding:10px 12px">
+        <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--brand)">⚙️ 解析规则（必填，见下方示例说明）</summary>
+
+        <div class="grid" id="cssFields" style="margin-top:10px">
+          <div class="field"><label>① 条目选择器 item *</label><input id="pItem" placeholder="ul.list > li"></div>
+          <div class="field"><label>② 标题选择器 title *</label><input id="pTitle" placeholder="a[title] 或 a"></div>
+          <div class="field"><label>③ 日期选择器 date（可选）</label><input id="pDate" placeholder=".time 或 span.date"></div>
+          <div class="field"><label>④ 链接选择器 link</label><input id="pLink" placeholder="a[title] 或 a"></div>
+          <div class="field full"><label>⑤ 链接前缀 link_prefix（相对链接必填）</label><input id="pPrefix" placeholder="https://example.com/zbgg/"></div>
+        </div>
+
+        <div class="field" id="regexFields" style="display:none;margin-top:10px">
+          <label>正则表达式（用命名组 (?P&lt;title&gt;...) (?P&lt;date&gt;...) (?P&lt;link&gt;...)）</label>
+          <input id="pPattern" placeholder="(?P<title>&lt;a[^&gt;]*&gt;[^&lt;]+&lt;/a&gt;).*?(?P&lt;date&gt;20\d\d-\d\d-\d\d)" style="width:100%">
+        </div>
+
+        <div class="grid" id="apiFields" style="display:none;margin-top:10px">
+          <div class="field full"><label>API 地址 *</label><input id="pApiUrl" placeholder="https://example.com/api/list"></div>
+          <div class="field"><label>标题字段 *</label><input id="pTField" placeholder="title"></div>
+          <div class="field"><label>日期字段 *</label><input id="pDField" placeholder="releaseTime"></div>
+          <div class="field"><label>链接字段</label><input id="pLField" placeholder="linkTo（可为空）"></div>
+          <div class="field"><label>每页条数</label><input id="pPSize" type="number" value="50" placeholder="50"></div>
+          <div class="field"><label>最多翻页数</label><input id="pMPages" type="number" value="5" placeholder="5"></div>
+          <div class="field full"><label>固定参数 JSON（可选）</label><input id="pAParams" placeholder='{"channelId":2850}'></div>
+        </div>
+      </details>
+
+      <div class="grid">
+        <div class="field"><label>翻页规则（可选）</label><input id="fPagePattern" placeholder="https://example.com/zbgg/index_{page}.htm（第2页起）"></div>
+        <div class="field"><label>关键词过滤</label>
+          <select id="fFilter">
+            <option value="true">按 4省+关键词过滤（推荐）</option>
+            <option value="false">全部收录（不过滤）</option>
+          </select>
+        </div>
+      </div>
+
       <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-primary" id="btnAddSrc">添加网站</button>
+        <button class="btn btn-primary" id="btnAddSrc">＋ 添加网站</button>
+        <span class="hint">添加后点下方"保存到 GitHub"立即生效</span>
       </div>
     </div>
-    <div class="note" style="margin-top:10px">需要登录的网站：登录后 F12 → 网络 → 复制 Cookie 发给 Agent 写入本地（不公开）。动态渲染网站（如招商/国网）暂不支持脚本抓取。</div>
+
+    <div class="note" style="margin-top:10px">
+      <b>解析规则示例：</b><br>
+      ① <b>CSS</b>（网页列表）：条目选器填列表项，标题/日期/链接选器填该项内对应元素。打开网站按 F12 检查元素即可复制选择器。<br>
+      ② <b>正则</b>：适合无规律页面，用命名组抓标题/日期/链接，如 <code>(?P&lt;title&gt;[^&lt;]+).*?(?P&lt;date&gt;20\d\d-\d\d-\d\d)</code>。<br>
+      ③ <b>JSON 接口</b>：如果网站有数据接口（F12 → 网络 → 找返回 JSON 的请求），填接口地址和字段名。<br>
+      <b>需要登录的网站</b>：登录后 F12 → 网络 → 复制 Cookie 发给 Agent 写入本地（不会公开）。
+    </div>
   </section>
 
   <section class="card">
@@ -230,14 +283,46 @@
   $("srcList").addEventListener("click", function (e) {
     if (e.target.dataset.dsrc !== undefined) { cfg.sources.splice(+e.target.dataset.dsrc, 1); renderSources(); }
   });
+  // 解析方式切换
+  $("fType").addEventListener("change", function () {
+    var v = this.value;
+    $("cssFields").style.display = v === "css" ? "" : "none";
+    $("regexFields").style.display = v === "regex" ? "" : "none";
+    $("apiFields").style.display = v === "api_json" ? "" : "none";
+  });
   $("btnAddSrc").addEventListener("click", function () {
-    var name = $("fName").value.trim(), url = $("fUrl").value.trim();
+    var name = $("fName").value.trim(), url = $("fUrl").value.trim(), type = $("fType").value;
     if (!name || !url) { alert("请填网站名称和列表页 URL"); return; }
-    var p = { key: "src_" + Date.now().toString(36), name: name, kind: "自定义", list_url: url, page_depth: 1, stage: "公告", filter: true, parse: { type: "css", item: "", title: "", date: "", link: "", link_prefix: "" } };
-    var sel = $("fSel").value.trim();
-    if (sel) { p.parse.item = sel; p.parse.title = "a"; p.parse.link = "a"; }
+    var p = { key: "src_" + Date.now().toString(36), name: name, kind: "自定义", list_url: url, page_depth: 1, stage: $("fStage").value.trim() || "公告", filter: $("fFilter").value === "true", parse: { type: type } };
+    var pp = $("fPagePattern").value.trim();
+    if (pp) { p.page_url_pattern = pp; p.page_depth = 3; }
+    if (type === "css") {
+      var item = $("pItem").value.trim();
+      if (!item) { alert("CSS 方式请至少填 ① 条目选择器 item"); return; }
+      p.parse.item = item;
+      p.parse.title = $("pTitle").value.trim() || "a";
+      p.parse.date = $("pDate").value.trim() || "";
+      p.parse.link = $("pLink").value.trim() || "a";
+      p.parse.link_prefix = $("pPrefix").value.trim() || "";
+    } else if (type === "regex") {
+      var pat = $("pPattern").value.trim();
+      if (!pat) { alert("正则方式请填正则表达式"); return; }
+      p.parse.pattern = pat;
+    } else if (type === "api_json") {
+      var apiUrl = $("pApiUrl").value.trim();
+      if (!apiUrl) { alert("JSON 接口方式请填 API 地址"); return; }
+      p.parse.api_url = apiUrl;
+      p.parse.title_field = $("pTField").value.trim() || "title";
+      p.parse.date_field = $("pDField").value.trim() || "releaseTime";
+      p.parse.link_field = $("pLField").value.trim() || "";
+      p.parse.link_prefix = $("pPrefix").value.trim() || "";
+      p.parse.api_page_size = parseInt($("pPSize").value || "50", 10) || 50;
+      p.parse.api_max_pages = parseInt($("pMPages").value || "5", 10) || 5;
+      var ap = $("pAParams").value.trim();
+      if (ap) { try { p.parse.api_params = JSON.parse(ap); } catch (e) { alert("固定参数 JSON 格式不对：\n" + ap); return; } }
+    }
     cfg.sources.push(p);
-    $("fName").value = ""; $("fUrl").value = ""; $("fSel").value = "";
+    $("fName").value = ""; $("fUrl").value = ""; $("pItem").value = ""; $("pTitle").value = ""; $("pDate").value = ""; $("pLink").value = ""; $("pPrefix").value = ""; $("pPattern").value = ""; $("pApiUrl").value = ""; $("pTField").value = ""; $("pDField").value = ""; $("pLField").value = ""; $("pAParams").value = ""; $("fStage").value = ""; $("fPagePattern").value = "";
     renderSources();
   });
 
