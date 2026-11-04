@@ -75,6 +75,11 @@
       <span class="hint">只收集所选时间内的公告</span>
     </div>
     <div class="row">
+      <label>AI 自动探测</label>
+      <label style="font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:400"><input type="checkbox" id="autoDetect" checked> 允许空选择器站点自动探测并回填（纯规则，0 积分）</label>
+      <span class="hint">勾选：选择器为空的站点自动探测一次并回填保存，下次直接复用；取消：直接跳过，0 积分消耗</span>
+    </div>
+    <div class="row">
       <label>收集阶段</label>
       <div class="chips" id="stageChips">
         <span class="chip on" data-v="all">全部</span>
@@ -170,13 +175,21 @@
   </section>
 
   <section class="card">
-    <h2><span class="emoji">💾</span> 保存全部设置</h2>
+    <h2><span class="emoji">💾</span> 保存全部设置（本地 / GitHub 二选一）</h2>
     <div class="row">
-      <button class="btn btn-primary" id="btnSave">保存到 GitHub 并生效</button>
-      <input type="password" id="tokenInput" placeholder="GitHub Token（ghp_ 开头，粘贴在此）" style="flex:1;min-width:220px;max-width:360px" autocomplete="off">
+      <button class="btn btn-primary" id="btnLocalSave">💾 本地保存（立即生效）</button>
+      <button class="btn btn-ghost" id="btnExport">⬇ 导出 JSON 配置</button>
+      <button class="btn btn-ghost" id="btnImport">⬆ 导入 JSON 配置</button>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+    </div>
+    <div class="note" style="margin-bottom:12px"><b>本地保存</b>：全部配置（数据源、关键词、解析选择器、AI 探测开关）存入本浏览器，前台看板立即读取本地配置，无需 Token。<b>导出</b>：下载 sites-config.json 备份，换电脑可导入恢复。<b>导入</b>：上传 JSON 覆盖当前本地配置，兼容旧版 sites-config.json（biddingSites / mediaSites / mediaKeywordList）。</div>
+    <div class="row" style="padding-top:10px;border-top:1px dashed var(--line)">
+      <button class="btn btn-ghost" id="btnSave">保存到 GitHub（可选）</button>
+      <input type="password" id="tokenInput" placeholder="GitHub Classic Token（ghp_ 开头）" style="flex:1;min-width:220px;max-width:360px" autocomplete="off">
       <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="rememberToken" checked> 记住</label>
     </div>
-    <div class="hint" style="margin-bottom:4px">Token 只保存在本浏览器，不会上传到仓库。首次使用请在上方输入框粘贴你的 GitHub classic Token（需勾选 repo 权限）；记住后可免输入。</div>
+    <div class="msg err" id="tokenWarn" style="display:none">⚠ 细粒度 Token 不支持，请使用 Classic 经典 Token（ghp_ 开头，需勾选 repo 权限）。</div>
+    <div class="hint" style="margin-bottom:4px">本地保存与 GitHub 保存互不冲突、可切换使用：本地保存适合单机即时生效；GitHub 保存适合换设备/多端共享，且每日自动抓取默认读取 GitHub 配置。Classic Token 只保存在本浏览器，不会上传到仓库。</div>
     <div class="msg" id="saveMsg"></div>
   </section>
 
@@ -185,21 +198,79 @@
 <script>
 (function () {
   var REPO = "kennykaipro/bidding-board", BRANCH = "main", FILE = "sources_config.json";
+  var LS_KEY = "bidding_config_v2";
   var $ = function (id) { return document.getElementById(id); };
-  var cfg = { version: 2, settings: { date_range_days: 7, stages: [] }, keywords: [], sources: [] };
+  var cfg = { version: 2, settings: { date_range_days: 7, stages: [], auto_detect: true }, keywords: [], sources: [] };
 
-  // ---- 读取配置 ----
+  // ---- 读取配置：优先本地 localStorage，其次 GitHub ----
   function load() {
+    var local = null;
+    try { local = JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) { local = null; }
+    if (local && local.settings) {
+      cfg = Object.assign(cfg, local);
+      cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, local.settings || {});
+      cfg.keywords = local.keywords || [];
+      cfg.sources = local.sources || [];
+      renderAll();
+      return;
+    }
     return fetch("https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/" + FILE + "?t=" + Date.now())
       .then(function (r) { if (!r.ok) throw new Error("config-not-found"); return r.json(); })
       .then(function (d) {
         cfg = Object.assign(cfg, d);
-        cfg.settings = Object.assign({ date_range_days: 7, stages: [] }, d.settings || {});
+        cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, d.settings || {});
         cfg.keywords = d.keywords || [];
         cfg.sources = d.sources || [];
         renderAll();
       })
       .catch(function () { renderAll(); });
+  }
+
+  // 旧版 sites-config.json 兼容映射：biddingSites/mediaSites/mediaKeywordList → v2
+  function normalizeLegacy(d) {
+    if (d && (d.biddingSites || d.mediaSites || d.mediaKeywordList) && !d.sources) {
+      var out = { version: 2, settings: {}, keywords: [], sources: [] };
+      if (d.settings) out.settings = d.settings;
+      if (typeof d.dateRangeDays === "number") out.settings.date_range_days = d.dateRangeDays;
+      var sites = (d.biddingSites || []).concat(d.mediaSites || []);
+      out.sources = sites.map(function (s, i) {
+        var ss = s || {};
+        var parse = { type: (ss.parseType || "css") };
+        if (parse.type === "css") {
+          parse.item = ss.item || ss.itemSelector || "";
+          parse.title = ss.title || ss.titleSelector || "a";
+          parse.date = ss.date || ss.dateSelector || "";
+          parse.link = ss.link || ss.linkSelector || "a";
+          parse.link_prefix = ss.linkPrefix || ss.link_prefix || "";
+        } else if (parse.type === "regex") {
+          parse.pattern = ss.pattern || "";
+        } else if (parse.type === "api_json") {
+          parse.api_url = ss.apiUrl || ss.listUrl || ss.list_url || "";
+          parse.title_field = ss.titleField || "title";
+          parse.date_field = ss.dateField || "releaseTime";
+          parse.link_field = ss.linkField || "";
+          parse.link_prefix = ss.linkPrefix || ss.link_prefix || "";
+        }
+        return {
+          key: ss.key || "src_" + (i + 1) + "_" + Date.now().toString(36),
+          name: ss.name || ss.siteName || ("网站" + (i + 1)),
+          kind: ss.kind || "自定义",
+          list_url: ss.listUrl || ss.list_url || ss.url || "",
+          page_depth: ss.pageDepth || 1,
+          stage: ss.stage || "公告",
+          filter: ss.filter !== false,
+          parse: parse
+        };
+      });
+      var kw = d.mediaKeywordList || d.keywordList || d.keywords || [];
+      out.keywords = kw.map(function (g, i) {
+        if (typeof g === "string") return { group: "组" + (i + 1), words: [g] };
+        if (g && g.group) return { group: g.group, words: g.words || [] };
+        return { group: "组" + (i + 1), words: (g.words || [g]).filter(Boolean) };
+      });
+      return out;
+    }
+    return d;
   }
 
   function initTokenHint() {
@@ -216,12 +287,14 @@
     $("dateSel").value = [7,30,90,180,365].indexOf(days) >= 0 ? String(days) : "-1";
     $("customWrap").style.display = $("dateSel").value === "-1" ? "" : "none";
     $("customDays").value = days;
+    $("autoDetect").checked = cfg.settings.auto_detect !== false;
     var st = cfg.settings.stages || [];
     document.querySelectorAll("#stageChips .chip").forEach(function (c) {
       var v = c.dataset.v;
       c.classList.toggle("on", v === "all" ? (st.length === 0) : st.indexOf(v) >= 0);
     });
   }
+  $("autoDetect").addEventListener("change", function () { cfg.settings.auto_detect = this.checked; });
   $("dateSel").addEventListener("change", function () {
     $("customWrap").style.display = this.value === "-1" ? "" : "none";
   });
@@ -346,17 +419,82 @@
     if (status === 409) return "配置刚被其他操作修改，请重试一次";
     return "GitHub 返回错误（HTTP " + status + "），请重试或换一个 Token";
   }
+  function collectSettings() {
+    if ($("dateSel").value === "-1") cfg.settings.date_range_days = Math.max(1, parseInt($("customDays").value || "7", 10) || 7);
+    else cfg.settings.date_range_days = parseInt($("dateSel").value, 10);
+    cfg.settings.auto_detect = $("autoDetect").checked;
+  }
+  function collectPayload() {
+    collectSettings();
+    return JSON.stringify({ version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources }, null, 2);
+  }
+  // ---- 细粒度 Token 提示：github_pat_ 不兼容 ----
+  $("tokenInput").addEventListener("input", function () {
+    var v = this.value.trim();
+    $("tokenWarn").style.display = v.indexOf("github_pat_") === 0 ? "block" : "none";
+  });
+  // ---- 本地保存（localStorage，立即生效）----
+  $("btnLocalSave").addEventListener("click", function () {
+    collectSettings();
+    var payload = { version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources };
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(payload));
+      showMsg("ok", "已保存到本地浏览器 ✅ 前台看板立即读取本地配置生效；换电脑可【导出 JSON 配置】再【导入】恢复。");
+    } catch (e) {
+      showMsg("err", "本地保存失败：" + (e && e.message ? e.message : "浏览器存储空间不足或不可用"));
+    }
+  });
+  // ---- 导出 JSON 配置（sites-config.json 备份）----
+  $("btnExport").addEventListener("click", function () {
+    var payload = collectPayload();
+    var blob = new Blob([payload], { type: "application/json;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "sites-config.json";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 100);
+    showMsg("ok", "已导出 sites-config.json 配置备份 ✅");
+  });
+  // ---- 导入 JSON 配置（覆盖当前本地配置）----
+  $("btnImport").addEventListener("click", function () { $("importFile").click(); });
+  $("importFile").addEventListener("change", function () {
+    var file = this.files && this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      try {
+        var d = JSON.parse(ev.target.result);
+        var norm = normalizeLegacy(d);
+        if (!norm || !norm.settings) { throw new Error("格式不正确"); }
+        cfg = Object.assign({}, { version: 2, settings: { date_range_days: 7, stages: [], auto_detect: true }, keywords: [], sources: [] }, norm);
+        cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, norm.settings || {});
+        cfg.keywords = norm.keywords || [];
+        cfg.sources = norm.sources || [];
+        // 导入即视为本地配置覆盖，立即生效
+        try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) {}
+        renderAll();
+        showMsg("ok", "导入成功 ✅ 已覆盖本地配置并生效（旧版 biddingSites / mediaSites / mediaKeywordList 已自动兼容转换）。");
+      } catch (e) {
+        showMsg("err", "导入失败：JSON 解析错误" + (e && e.message ? "：" + e.message : ""));
+      }
+      this.value = "";
+    };
+    reader.readAsText(file);
+  });
   $("btnSave").addEventListener("click", function () {
     var token = readToken();
     if (!token) {
-      showMsg("err", "请先在上方输入框粘贴 GitHub Token（ghp_ 开头），或先保存一次让浏览器记住。");
+      showMsg("err", "请先在上方输入框粘贴 GitHub Classic Token（ghp_ 开头），或先用【本地保存】。");
       $("tokenInput").focus();
       return;
     }
-    // 日期
-    if ($("dateSel").value === "-1") cfg.settings.date_range_days = Math.max(1, parseInt($("customDays").value || "7", 10) || 7);
-    else cfg.settings.date_range_days = parseInt($("dateSel").value, 10);
-    var payload = JSON.stringify({ version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources }, null, 2);
+    if (token.indexOf("github_pat_") === 0) {
+      $("tokenWarn").style.display = "block";
+      showMsg("err", "细粒度 Token 不支持，请使用 Classic 经典 Token（ghp_ 开头）。");
+      return;
+    }
+    var payload = collectPayload();
     $("btnSave").disabled = true;
     showMsg("", "正在保存…");
     // 1) 预校验 Token（请求当前用户，快速暴露 401/403）
