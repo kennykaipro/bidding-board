@@ -122,10 +122,10 @@
    "page_depth": 1,
    "parse": {
     "type": "css",
-    "item": "ul > li",
-    "title": "a[title]",
-    "date": "em",
-    "link": "a[title]"
+    "item": "ul.inside-news > li",
+    "title": "h2 a",
+    "date": "p.date",
+    "link": "h2 a"
    }
   },
   {
@@ -148,9 +148,10 @@
    "page_depth": 1,
    "parse": {
     "type": "css",
-    "item": "ul > li",
-    "title": "a[title]",
-    "link": "a[title]"
+    "item": "ul.news-items > li",
+    "title": "a",
+    "date": "span.news-time",
+    "link": "a"
    }
   },
   {
@@ -180,13 +181,14 @@
    "name": "深圳大学采购网",
    "kind": "教育",
    "stage": "公告",
-   "list_url": "https://bidding.szu.edu.cn/cggg/zbcg/xnjzcg.htm",
+   "list_url": "https://bidding.szu.edu.cn/",
    "page_depth": 1,
    "parse": {
     "type": "css",
-    "item": "ul > li",
-    "title": "a[title]",
-    "link": "a[title]"
+    "item": "li:has(em)",
+    "title": "a.flex",
+    "date": "em",
+    "link": "a.flex"
    }
   },
   {
@@ -220,10 +222,10 @@
    "page_depth": 1,
    "parse": {
     "type": "css",
-    "item": "ul > li",
-    "title": "a[title]",
-    "date": "em",
-    "link": "a[title]"
+    "item": "ul.inside-news > li",
+    "title": "h2 a",
+    "date": "p.date",
+    "link": "h2 a"
    }
   },
   {
@@ -237,6 +239,7 @@
     "type": "css",
     "item": "ul.news-list > li",
     "title": "a[title]",
+    "date": "span.news-date",
     "link": "a[title]"
    }
   },
@@ -248,10 +251,7 @@
    "list_url": "https://pur.cityu-dg.edu.cn/cms/document/indexList.html",
    "page_depth": 1,
    "parse": {
-    "type": "css",
-    "item": ".list li",
-    "title": "a[title]",
-    "link": "a[title]"
+    "type": "css"
    }
   },
   {
@@ -263,10 +263,10 @@
    "page_depth": 1,
    "parse": {
     "type": "css",
-    "item": "ul > li",
-    "title": "a[title]",
-    "date": "em",
-    "link": "a[title]"
+    "item": "ul.inside-news > li",
+    "title": "h2 a",
+    "date": "p.date",
+    "link": "h2 a"
    }
   }
  ]
