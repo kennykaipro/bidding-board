@@ -266,6 +266,7 @@
       cfgSource = "local";
       renderAll();
       ensureKeywordsFromGh(); // 本地无关键词时补取 GitHub 已上架关键词
+      ensureRegionsFromGh(); // 本地无地域时补取 GitHub 已上架地域
       return;
     }
     return fetch("https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/" + FILE + "?t=" + Date.now())
@@ -279,7 +280,7 @@
         cfgSource = "github";
         renderAll();
       })
-      .catch(function () { renderAll(); ensureKeywordsFromGh(); });
+      .catch(function () { renderAll(); ensureKeywordsFromGh(); ensureRegionsFromGh(); });
   }
 
   // 旧版 sites-config.json 兼容映射：biddingSites/mediaSites/mediaKeywordList → v2
@@ -381,6 +382,26 @@
         .then(function (r) { if (!r.ok) throw new Error("not-found"); return r.json(); })
         .then(function (d) {
           if (d && Array.isArray(d.keywords) && d.keywords.length) { cfg.keywords = d.keywords; renderKeywords(); }
+        })
+        .catch(function () { tryUrl(i + 1); });
+    }
+    tryUrl(0);
+  }
+  // 本地无地域配置时，从 GitHub 已上架配置补取地域（仅更新 regions，不触碰数据源/设置/JSON结构）
+  function ensureRegionsFromGh() {
+    if (cfg.regions && cfg.regions.length) return;
+    var ghHost = REPO.split("/")[0] + ".github.io";
+    var ghPath = REPO.split("/")[1] + "/" + FILE;
+    var urls = [
+      "https://" + ghHost + "/" + ghPath + "?t=" + Date.now(),
+      "https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/" + FILE + "?t=" + Date.now()
+    ];
+    function tryUrl(i) {
+      if (i >= urls.length) return;
+      fetch(urls[i])
+        .then(function (r) { if (!r.ok) throw new Error("not-found"); return r.json(); })
+        .then(function (d) {
+          if (d && Array.isArray(d.regions) && d.regions.length) { cfg.regions = d.regions; renderRegions(); }
         })
         .catch(function () { tryUrl(i + 1); });
     }
