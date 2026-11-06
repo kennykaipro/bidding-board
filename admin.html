@@ -126,65 +126,8 @@
     <div id="builtinList" style="margin-bottom:14px"></div>
     <div id="srcList"></div>
     <div style="margin-top:12px">
-      <div class="grid">
-        <div class="field"><label>网站名称 *</label><input id="fName" placeholder="如：某市公共资源交易网"></div>
-        <div class="field"><label>列表页 URL *</label><input id="fUrl" placeholder="https://example.com/zbgg/"></div>
-        <div class="field"><label>解析方式</label>
-          <select id="fType">
-            <option value="css">CSS 选择器（网页列表）</option>
-            <option value="regex">正则表达式（网页列表）</option>
-            <option value="api_json">JSON 接口（网站有 API）</option>
-          </select>
-        </div>
-        <div class="field"><label>阶段标注</label><input id="fStage" placeholder="公告（可选，如：招标公告）"></div>
-      </div>
-
-      <details style="margin:10px 0;border:1px solid var(--line);border-radius:10px;padding:10px 12px">
-        <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--brand)">⚙️ 解析规则（必填，见下方示例说明）</summary>
-
-        <div class="grid" id="cssFields" style="margin-top:10px">
-          <div class="field"><label>① 条目选择器 item *</label><input id="pItem" placeholder="ul.list > li"></div>
-          <div class="field"><label>② 标题选择器 title *</label><input id="pTitle" placeholder="a[title] 或 a"></div>
-          <div class="field"><label>③ 日期选择器 date（可选）</label><input id="pDate" placeholder=".time 或 span.date"></div>
-          <div class="field"><label>④ 链接选择器 link</label><input id="pLink" placeholder="a[title] 或 a"></div>
-          <div class="field full"><label>⑤ 链接前缀 link_prefix（相对链接必填）</label><input id="pPrefix" placeholder="https://example.com/zbgg/"></div>
-        </div>
-
-        <div class="field" id="regexFields" style="display:none;margin-top:10px">
-          <label>正则表达式（用命名组 (?P&lt;title&gt;...) (?P&lt;date&gt;...) (?P&lt;link&gt;...)）</label>
-          <input id="pPattern" placeholder="(?P<title>&lt;a[^&gt;]*&gt;[^&lt;]+&lt;/a&gt;).*?(?P&lt;date&gt;20\d\d-\d\d-\d\d)" style="width:100%">
-        </div>
-
-        <div class="grid" id="apiFields" style="display:none;margin-top:10px">
-          <div class="field full"><label>API 地址 *</label><input id="pApiUrl" placeholder="https://example.com/api/list"></div>
-          <div class="field"><label>标题字段 *</label><input id="pTField" placeholder="title"></div>
-          <div class="field"><label>日期字段 *</label><input id="pDField" placeholder="releaseTime"></div>
-          <div class="field"><label>链接字段</label><input id="pLField" placeholder="linkTo（可为空）"></div>
-          <div class="field"><label>每页条数</label><input id="pPSize" type="number" value="50" placeholder="50"></div>
-          <div class="field"><label>最多翻页数</label><input id="pMPages" type="number" value="5" placeholder="5"></div>
-          <div class="field full"><label>固定参数 JSON（可选）</label><input id="pAParams" placeholder='{"channelId":2850}'></div>
-          <div class="field full"><label>详情链接模板（可选，字段用 {xxx} 占位，如 /jyxxDetails.htm?contentId={id}&code={code}）</label><input id="pLTpl" placeholder="/detail.html?contentId={id}"></div>
-          <div class="field"><label>日期起始字段（可选）</label><input id="pDBegin" placeholder="releaseTimeBegin"></div>
-          <div class="field"><label>日期结束字段（可选）</label><input id="pDEnd" placeholder="releaseTimeEnd"></div>
-        </div>
-      </details>
-
-      <div class="grid">
-        <div class="field"><label>翻页规则（可选）</label><input id="fPagePattern" placeholder="https://example.com/zbgg/index_{page}.htm（第2页起）"></div>
-        <div class="field"><label>关键词过滤</label>
-          <select id="fFilter">
-            <option value="true">按 4省+关键词过滤（推荐）</option>
-            <option value="false">全部收录（不过滤）</option>
-          </select>
-        </div>
-      </div>
-
-      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <span class="edit-badge" id="editBadge" style="display:none">正在编辑</span>
-        <button class="btn btn-primary" id="btnAddSrc">＋ 添加网站</button>
-        <button class="btn btn-ghost btn-sm" id="btnCancelEdit" style="display:none">取消编辑</button>
-        <span class="hint">添加后点下方"保存到 GitHub"立即生效</span>
-      </div>
+      <button class="btn btn-primary" id="btnOpenAdd">＋ 添加网站</button>
+      <span class="hint">点开后填写网站与解析规则；列表中的网站可点「编辑」修改、点「规则」查看抓取逻辑</span>
     </div>
 
     <div class="note" style="margin-top:10px">
@@ -217,6 +160,77 @@
   </section>
 
 </div>
+
+<dialog id="srcDialog" style="width:min(680px,94vw);border:1px solid var(--line);border-radius:12px;padding:0;max-height:88vh;overflow:auto">
+  <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:#fff;z-index:1">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0">
+      <h3 id="dialogTitle" style="margin:0;font-size:15px">添加网站</h3>
+      <span class="edit-badge" id="editBadge" style="display:none">编辑中</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="btnDialogClose">✕ 关闭</button>
+  </div>
+  <div style="padding:14px 16px">
+    <div class="grid">
+      <div class="field"><label>网站名称 *</label><input id="fName" placeholder="如：某市公共资源交易网"></div>
+      <div class="field"><label>列表页 URL *</label><input id="fUrl" placeholder="https://example.com/zbgg/"></div>
+      <div class="field"><label>解析方式</label>
+        <select id="fType">
+          <option value="css">CSS 选择器（网页列表）</option>
+          <option value="regex">正则表达式（网页列表）</option>
+          <option value="api_json">JSON 接口（网站有 API）</option>
+        </select>
+      </div>
+      <div class="field"><label>阶段标注</label><input id="fStage" placeholder="公告（可选，如：招标公告）"></div>
+    </div>
+
+    <details style="margin:10px 0;border:1px solid var(--line);border-radius:10px;padding:10px 12px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--brand)">⚙️ 解析规则（必填，见下方示例说明）</summary>
+
+      <div class="grid" id="cssFields" style="margin-top:10px">
+        <div class="field"><label>① 条目选择器 item *</label><input id="pItem" placeholder="ul.list > li"></div>
+        <div class="field"><label>② 标题选择器 title *</label><input id="pTitle" placeholder="a[title] 或 a"></div>
+        <div class="field"><label>③ 日期选择器 date（可选）</label><input id="pDate" placeholder=".time 或 span.date"></div>
+        <div class="field"><label>④ 链接选择器 link</label><input id="pLink" placeholder="a[title] 或 a"></div>
+        <div class="field full"><label>⑤ 链接前缀 link_prefix（相对链接必填）</label><input id="pPrefix" placeholder="https://example.com/zbgg/"></div>
+      </div>
+
+      <div class="field" id="regexFields" style="display:none;margin-top:10px">
+        <label>正则表达式（用命名组 (?P&lt;title&gt;...) (?P&lt;date&gt;...) (?P&lt;link&gt;...)）</label>
+        <input id="pPattern" placeholder="(?P<title>&lt;a[^&gt;]*&gt;[^&lt;]+&lt;/a&gt;).*?(?P&lt;date&gt;20\d\d-\d\d-\d\d)" style="width:100%">
+      </div>
+
+      <div class="grid" id="apiFields" style="display:none;margin-top:10px">
+        <div class="field full"><label>API 地址 *</label><input id="pApiUrl" placeholder="https://example.com/api/list"></div>
+        <div class="field"><label>标题字段 *</label><input id="pTField" placeholder="title"></div>
+        <div class="field"><label>日期字段 *</label><input id="pDField" placeholder="releaseTime"></div>
+        <div class="field"><label>链接字段</label><input id="pLField" placeholder="linkTo（可为空）"></div>
+        <div class="field"><label>每页条数</label><input id="pPSize" type="number" value="50" placeholder="50"></div>
+        <div class="field"><label>最多翻页数</label><input id="pMPages" type="number" value="5" placeholder="5"></div>
+        <div class="field full"><label>固定参数 JSON（可选）</label><input id="pAParams" placeholder='{"channelId":2850}'></div>
+        <div class="field full"><label>详情链接模板（可选，字段用 {xxx} 占位，如 /jyxxDetails.htm?contentId={id}&code={code}）</label><input id="pLTpl" placeholder="/detail.html?contentId={id}"></div>
+        <div class="field"><label>日期起始字段（可选）</label><input id="pDBegin" placeholder="releaseTimeBegin"></div>
+        <div class="field"><label>日期结束字段（可选）</label><input id="pDEnd" placeholder="releaseTimeEnd"></div>
+      </div>
+    </details>
+
+    <div class="grid">
+      <div class="field"><label>翻页规则（可选）</label><input id="fPagePattern" placeholder="https://example.com/zbgg/index_{page}.htm（第2页起）"></div>
+      <div class="field"><label>关键词过滤</label>
+        <select id="fFilter">
+          <option value="true">按 4省+关键词过滤（推荐）</option>
+          <option value="false">全部收录（不过滤）</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-top:1px dashed var(--line);padding-top:12px">
+      <button class="btn btn-primary" id="btnAddSrc">保存</button>
+      <button class="btn btn-ghost btn-sm" id="btnDelSrc" style="display:none">删除此数据源</button>
+      <button class="btn btn-ghost btn-sm" id="btnCancelEdit">取消</button>
+      <span class="hint">保存后点下方「保存到 GitHub」上架生效</span>
+    </div>
+  </div>
+</dialog>
 
 <script>
 (function () {
@@ -344,6 +358,7 @@
     return { groups: groups.length, words: words };
   }
   function renderKeywords() {
+    if (!Array.isArray(cfg.keywords)) cfg.keywords = [];
     var stat = kwCount();
     $("kwStat").innerHTML = '<span>已上架 <b>' + stat.groups + '</b> 个词组 / <b>' + stat.words + '</b> 个关键词</span><span style="opacity:.8">（组内任一词命中即收录，改动后点「保存」生效）</span>';
     var box = $("kgroups"); box.innerHTML = "";
@@ -420,6 +435,7 @@
     });
   }
   function renderSources() {
+    if (!Array.isArray(cfg.sources)) cfg.sources = [];
     var box = $("srcList"); box.innerHTML = "";
     cfg.sources.forEach(function (s, i) {
       var d = document.createElement("div"); d.className = "src-card";
@@ -460,12 +476,13 @@
     $("apiFields").style.display = type === "api_json" ? "" : "none";
   }
   $("fType").addEventListener("change", function () { syncParseFields(this.value); });
-  function cancelEdit() { resetAddForm(); }
+  function cancelEdit() { if ($("srcDialog").open) $("srcDialog").close(); resetAddForm(); }
   function resetAddForm() {
     editingIndex = -1;
     $("editBadge").style.display = "none";
-    $("btnCancelEdit").style.display = "none";
-    $("btnAddSrc").textContent = "＋ 添加网站";
+    $("btnDelSrc").style.display = "none";
+    $("dialogTitle").textContent = "添加网站";
+    $("btnAddSrc").textContent = "保存";
     ["fName","fUrl","pItem","pTitle","pDate","pLink","pPrefix","pPattern","pApiUrl","pTField","pDField","pLField","pPSize","pMPages","pAParams","pLTpl","pDBegin","pDEnd","fStage","fPagePattern"].forEach(function (id) {
       var el = $(id); if (el) el.value = "";
     });
@@ -477,8 +494,9 @@
     var p = s.parse || {};
     editingIndex = i;
     $("editBadge").style.display = "inline-block";
-    $("editBadge").textContent = "正在编辑：」" + s.name + "「（保存后覆盖该网站配置）";
-    $("btnCancelEdit").style.display = "inline-block";
+    $("editBadge").textContent = "编辑中";
+    $("dialogTitle").textContent = "编辑网站：" + s.name;
+    $("btnDelSrc").style.display = "inline-block";
     $("btnAddSrc").textContent = "✔ 保存修改";
     $("fName").value = s.name || "";
     $("fUrl").value = s.list_url || "";
@@ -506,7 +524,7 @@
       $("pDBegin").value = s.api_date_begin_field || "";
       $("pDEnd").value = s.api_date_end_field || "";
     }
-    var first = $("fName"); if (first && first.scrollIntoView) first.scrollIntoView({ behavior: "smooth", block: "center" });
+    $("srcDialog").showModal();
   }
   function collectSrcFromForm(type, base) {
     var p = base ? Object.assign({}, base) : {};
@@ -564,10 +582,23 @@
       cfg.sources.push(p);
       showMsg("ok", "已添加数据源「" + p.name + "」 ✅ 点下方「保存到 GitHub」即生效。");
     }
+    $("srcDialog").close();
     resetAddForm();
     renderSources();
   });
+  // 弹窗开关：添加 / 关闭 / 取消 / 编辑态删除
+  $("btnOpenAdd").addEventListener("click", function () { resetAddForm(); $("srcDialog").showModal(); });
+  $("btnDialogClose").addEventListener("click", function () { cancelEdit(); });
   $("btnCancelEdit").addEventListener("click", function () { cancelEdit(); });
+  $("btnDelSrc").addEventListener("click", function () {
+    if (editingIndex < 0) return;
+    var s = cfg.sources[editingIndex];
+    if (!confirm("确定删除数据源「" + s.name + "」？删除后需点「保存到 GitHub」才生效。")) return;
+    cfg.sources.splice(editingIndex, 1);
+    cancelEdit();
+    renderSources();
+    showMsg("ok", "已删除数据源「" + s.name + "」 ✅ 点下方「保存到 GitHub」上架生效。");
+  });
   // 从 GitHub 重载已上架配置（覆盖当前页面，并同步到本地缓存）
   $("btnReloadGh").addEventListener("click", function () {
     showMsg("", "正在从 GitHub 重载已上架配置…");
@@ -632,6 +663,7 @@
     var payload = { version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources };
     try {
       localStorage.setItem(LS_KEY, JSON.stringify(payload));
+      renderAll();
       showMsg("ok", "已保存到本地浏览器 ✅ 前台看板立即读取本地配置生效；换电脑可【导出 JSON 配置】再【导入】恢复。");
     } catch (e) {
       showMsg("err", "本地保存失败：" + (e && e.message ? e.message : "浏览器存储空间不足或不可用"));
@@ -726,6 +758,7 @@
             $("tokenInput").value = "";
           }
           showMsg("ok", "保存成功 ✅ 已生效，下一次每日自动抓取将按新设置运行；想立即看效果可告诉 Agent「试抓一次」。");
+          renderAll();
         } else {
           showMsg("err", "保存失败：" + ((res && res.message) || "未知错误"));
         }
