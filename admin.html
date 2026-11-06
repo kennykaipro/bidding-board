@@ -265,7 +265,7 @@
         cfgSource = "github";
         renderAll();
       })
-      .catch(function () { renderAll(); });
+      .catch(function () { renderAll(); ensureKeywordsFromGh(); });
   }
 
   // 旧版 sites-config.json 兼容映射：biddingSites/mediaSites/mediaKeywordList → v2
