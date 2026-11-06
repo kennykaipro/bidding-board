@@ -242,5 +242,22 @@
       "filter": false
     }
   ],
-  "regions": []
+  "regions": [
+    {
+      "province": "广东",
+      "cities": []
+    },
+    {
+      "province": "杭州",
+      "cities": []
+    },
+    {
+      "province": "苏州",
+      "cities": []
+    },
+    {
+      "province": "山东",
+      "cities": []
+    }
+  ]
 }
