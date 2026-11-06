@@ -1,285 +1,303 @@
 {
- "version": 2,
- "settings": {
-  "date_range_days": 180,
-  "stages": []
- },
- "keywords": [
-  {
-   "group": "信息化/数字化",
-   "words": [
-    "信息化",
-    "数字化",
-    "政务云",
-    "云计算",
-    "信创",
-    "数据中心",
-    "数据中台",
-    "数据治理",
-    "大数据"
-   ]
+  "version": 2,
+  "settings": {
+    "date_range_days": 180,
+    "stages": []
   },
-  {
-   "group": "智能化/AI",
-   "words": [
-    "智能化",
-    "人工智能",
-    "智能体",
-    "AI",
-    "大模型",
-    "智慧",
-    "智慧园区",
-    "智慧城市",
-    "智慧校园",
-    "智能"
-   ]
-  },
-  {
-   "group": "音视频/多媒体",
-   "words": [
-    "音视频",
-    "音像",
-    "多媒体",
-    "视频会议",
-    "会议系统",
-    "录播",
-    "音响",
-    "广播",
-    "舞台灯光",
-    "声光",
-    "电子显示"
-   ]
-  },
-  {
-   "group": "安防监控",
-   "words": [
-    "安防",
-    "监控",
-    "视频",
-    "门禁",
-    "报警",
-    "消防"
-   ]
-  },
-  {
-   "group": "显示设备",
-   "words": [
-    "LED",
-    "大屏",
-    "显示屏",
-    "电子屏",
-    "屏幕",
-    "教学一体机",
-    "智慧黑板",
-    "触控一体机",
-    "显示设备"
-   ]
-  },
-  {
-   "group": "系统集成/弱电",
-   "words": [
-    "系统集成",
-    "弱电",
-    "机房",
-    "服务器",
-    "网络",
-    "存储",
-    "指挥中心",
-    "调度中心",
-    "综合布线"
-   ]
-  },
-  {
-   "group": "声光电/舞台工程",
-   "words": [
-    "音视频",
-    "音频",
-    "音响",
-    "扩声",
-    "会议",
-    "多功能",
-    "多媒体",
-    "舞台机械",
-    "灯光",
-    "投影",
-    "视频",
-    "LED",
-    "显示",
-    "声光电",
-    "礼堂",
-    "阶梯教室",
-    "音乐厅"
-   ]
-  }
- ],
- "sources": [
-  {
-   "key": "szwb_clsb",
-   "name": "工务署-材料设备库",
-   "kind": "政府",
-   "stage": "公告",
-   "list_url": "http://szwb.sz.gov.cn/gwszwfw/clsbcx/index_2.html",
-   "page_depth": 1,
-   "parse": {
-    "type": "css",
-    "item": "ul.inside-news > li",
-    "title": "h2 a",
-    "date": "p.date",
-    "link": "h2 a"
-   },
-   "filter": false
-  },
-  {
-   "key": "szygcgpt",
-   "name": "深圳阳光采购平台",
-   "kind": "国企",
-   "stage": "公告",
-   "list_url": "https://www.szygcgpt.com/#/ygcg/index",
-   "page_depth": 1,
-   "parse": {
-    "type": "css"
-   },
-   "filter": false
-  },
-  {
-   "key": "szggzy_zfcg",
-   "name": "中国·深圳政府采购",
-   "kind": "政府",
-   "stage": "公告",
-   "list_url": "http://zfcg.szggzy.com:8081/gsgg/002001/list.html",
-   "page_depth": 1,
-   "parse": {
-    "type": "css",
-    "item": "ul.news-items > li",
-    "title": "a",
-    "date": "span.news-time",
-    "link": "a"
-   },
-   "filter": false
-  },
-  {
-   "key": "ciesco",
-   "name": "招商局集团采购网",
-   "kind": "央企",
-   "stage": "公告",
-   "list_url": "https://dzzb.ciesco.com.cn/",
-   "page_depth": 1,
-   "parse": {
-    "type": "css"
-   },
-   "filter": false
-  },
-  {
-   "key": "chinaoct",
-   "name": "华侨城集团采购网",
-   "kind": "央企",
-   "stage": "公告",
-   "list_url": "https://scm.chinaoct.com/",
-   "page_depth": 1,
-   "parse": {
-    "type": "css"
-   },
-   "filter": false
-  },
-  {
-   "key": "szu",
-   "name": "深圳大学采购网",
-   "kind": "教育",
-   "stage": "公告",
-   "list_url": "https://bidding.szu.edu.cn/",
-   "page_depth": 1,
-   "parse": {
-    "type": "css",
-    "item": "li:has(em)",
-    "title": "a.flex",
-    "date": "em",
-    "link": "a.flex"
-   },
-   "filter": false
-  },
-  {
-   "key": "crcement",
-   "name": "华润水泥采购网",
-   "kind": "央企",
-   "stage": "公告",
-   "list_url": "https://b2b.crcement.com/#/home/index-more",
-   "page_depth": 1,
-   "parse": {
-    "type": "css"
-   },
-   "filter": false
-  },
-  {
-   "key": "job592",
-   "name": "招标信息网(广东)",
-   "kind": "第三方",
-   "stage": "公告",
-   "list_url": "https://my.job592.com/baike/myzb_search.action",
-   "page_depth": 1,
-   "parse": {
-    "type": "css"
-   },
-   "filter": false
-  },
-  {
-   "key": "szwb_zbgg",
-   "name": "工务署-招标公告",
-   "kind": "政府",
-   "stage": "公告",
-   "list_url": "http://szwb.sz.gov.cn/gwszwfw/ztbcx/zhaobgg/index.html",
-   "page_depth": 1,
-   "parse": {
-    "type": "css",
-    "item": "ul.inside-news > li",
-    "title": "h2 a",
-    "date": "p.date",
-    "link": "h2 a"
-   },
-   "filter": false
-  },
-  {
-   "key": "zjj_sz",
-   "name": "深圳市住房和建设局",
-   "kind": "政府",
-   "stage": "公告",
-   "list_url": "http://zjj.sz.gov.cn/",
-   "page_depth": 1,
-   "parse": {
-    "type": "css",
-    "item": "ul.news-list > li",
-    "title": "a[title]",
-    "date": "span.news-date",
-    "link": "a[title]"
-   },
-   "filter": false
-  },
-  {
-   "key": "cityu_dg",
-   "name": "香港城市大学东莞",
-   "kind": "教育",
-   "stage": "公告",
-   "list_url": "https://pur.cityu-dg.edu.cn/cms/document/indexList.html",
-   "page_depth": 1,
-   "parse": {
-    "type": "css"
-   },
-   "filter": false
-  },
-  {
-   "key": "szwb_zbjh",
-   "name": "工务署-招标计划",
-   "kind": "政府",
-   "stage": "规划",
-   "list_url": "http://szwb.sz.gov.cn/gwszwfw/ztbcx/zbjh/",
-   "page_depth": 1,
-   "parse": {
-    "type": "css",
-    "item": "ul.inside-news > li",
-    "title": "h2 a",
-    "date": "p.date",
-    "link": "h2 a"
-   },
-   "filter": false
-  }
- ]
+  "keywords": [
+    {
+      "group": "信息化/数字化",
+      "words": [
+        "信息化",
+        "数字化",
+        "政务云",
+        "云计算",
+        "信创",
+        "数据中心",
+        "数据中台",
+        "数据治理",
+        "大数据"
+      ]
+    },
+    {
+      "group": "智能化/AI",
+      "words": [
+        "智能化",
+        "人工智能",
+        "智能体",
+        "AI",
+        "大模型",
+        "智慧",
+        "智慧园区",
+        "智慧城市",
+        "智慧校园",
+        "智能"
+      ]
+    },
+    {
+      "group": "音视频/多媒体",
+      "words": [
+        "音视频",
+        "音像",
+        "多媒体",
+        "视频会议",
+        "会议系统",
+        "录播",
+        "音响",
+        "广播",
+        "舞台灯光",
+        "声光",
+        "电子显示"
+      ]
+    },
+    {
+      "group": "安防监控",
+      "words": [
+        "安防",
+        "监控",
+        "视频",
+        "门禁",
+        "报警",
+        "消防"
+      ]
+    },
+    {
+      "group": "显示设备",
+      "words": [
+        "LED",
+        "大屏",
+        "显示屏",
+        "电子屏",
+        "屏幕",
+        "教学一体机",
+        "智慧黑板",
+        "触控一体机",
+        "显示设备"
+      ]
+    },
+    {
+      "group": "系统集成/弱电",
+      "words": [
+        "系统集成",
+        "弱电",
+        "机房",
+        "服务器",
+        "网络",
+        "存储",
+        "指挥中心",
+        "调度中心",
+        "综合布线"
+      ]
+    },
+    {
+      "group": "声光电/舞台工程",
+      "words": [
+        "音视频",
+        "音频",
+        "音响",
+        "扩声",
+        "会议",
+        "多功能",
+        "多媒体",
+        "舞台机械",
+        "灯光",
+        "投影",
+        "视频",
+        "LED",
+        "显示",
+        "声光电",
+        "礼堂",
+        "阶梯教室",
+        "音乐厅"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "key": "szwb_clsb",
+      "name": "工务署-材料设备库",
+      "kind": "政府",
+      "stage": "公告",
+      "list_url": "http://szwb.sz.gov.cn/gwszwfw/clsbcx/index_2.html",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "ul.inside-news > li",
+        "title": "h2 a",
+        "date": "p.date",
+        "link": "h2 a"
+      },
+      "filter": false
+    },
+    {
+      "key": "szygcgpt",
+      "name": "深圳阳光采购平台",
+      "kind": "国企",
+      "stage": "公告",
+      "list_url": "https://ygcg.szexgrp.com/jyxx",
+      "page_depth": 1,
+      "parse": {
+        "type": "api_json",
+        "api_url": "https://ygcg.szexgrp.com/api/v1/trade/content/page",
+        "api_params": {
+          "channelId": 4161,
+          "fields": null,
+          "title": "",
+          "bidSectionNumber": "",
+          "purchaseCom": "",
+          "siteId": 216,
+          "keyword": ""
+        },
+        "api_page_size": 50,
+        "api_max_pages": 5,
+        "title_field": "noticeTitle",
+        "date_field": "publishTime",
+        "link_template": "/jyxxDetails.htm?bidSectionNumber={bidSectionNumber}&contentId={id}&code={code}",
+        "link_prefix": "https://ygcg.szexgrp.com"
+      },
+      "filter": false,
+      "api_date_begin_field": "releaseTimeBegin",
+      "api_date_end_field": "releaseTimeEnd"
+    },
+    {
+      "key": "szggzy_zfcg",
+      "name": "中国·深圳政府采购",
+      "kind": "政府",
+      "stage": "公告",
+      "list_url": "http://zfcg.szggzy.com:8081/gsgg/002001/list.html",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "ul.news-items > li",
+        "title": "a",
+        "date": "span.news-time",
+        "link": "a"
+      },
+      "filter": false
+    },
+    {
+      "key": "ciesco",
+      "name": "招商局集团采购网",
+      "kind": "央企",
+      "stage": "公告",
+      "list_url": "https://dzzb.ciesco.com.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css"
+      },
+      "filter": false
+    },
+    {
+      "key": "chinaoct",
+      "name": "华侨城集团采购网",
+      "kind": "央企",
+      "stage": "公告",
+      "list_url": "https://scm.chinaoct.com/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css"
+      },
+      "filter": false
+    },
+    {
+      "key": "szu",
+      "name": "深圳大学采购网",
+      "kind": "教育",
+      "stage": "公告",
+      "list_url": "https://bidding.szu.edu.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "li:has(em)",
+        "title": "a.flex",
+        "date": "em",
+        "link": "a.flex"
+      },
+      "filter": false
+    },
+    {
+      "key": "crcement",
+      "name": "华润水泥采购网",
+      "kind": "央企",
+      "stage": "公告",
+      "list_url": "https://b2b.crcement.com/#/home/index-more",
+      "page_depth": 1,
+      "parse": {
+        "type": "css"
+      },
+      "filter": false
+    },
+    {
+      "key": "job592",
+      "name": "招标信息网(广东)",
+      "kind": "第三方",
+      "stage": "公告",
+      "list_url": "https://my.job592.com/baike/myzb_search.action",
+      "page_depth": 1,
+      "parse": {
+        "type": "css"
+      },
+      "filter": false
+    },
+    {
+      "key": "szwb_zbgg",
+      "name": "工务署-招标公告",
+      "kind": "政府",
+      "stage": "公告",
+      "list_url": "http://szwb.sz.gov.cn/gwszwfw/ztbcx/zhaobgg/index.html",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "ul.inside-news > li",
+        "title": "h2 a",
+        "date": "p.date",
+        "link": "h2 a"
+      },
+      "filter": false
+    },
+    {
+      "key": "zjj_sz",
+      "name": "深圳市住房和建设局",
+      "kind": "政府",
+      "stage": "公告",
+      "list_url": "http://zjj.sz.gov.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "ul.news-list > li",
+        "title": "a[title]",
+        "date": "span.news-date",
+        "link": "a[title]"
+      },
+      "filter": false
+    },
+    {
+      "key": "cityu_dg",
+      "name": "香港城市大学东莞",
+      "kind": "教育",
+      "stage": "公告",
+      "list_url": "https://pur.cityu-dg.edu.cn/cms/document/indexList.html",
+      "page_depth": 1,
+      "parse": {
+        "type": "css"
+      },
+      "filter": false
+    },
+    {
+      "key": "szwb_zbjh",
+      "name": "工务署-招标计划",
+      "kind": "政府",
+      "stage": "规划",
+      "list_url": "http://szwb.sz.gov.cn/gwszwfw/ztbcx/zbjh/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "ul.inside-news > li",
+        "title": "h2 a",
+        "date": "p.date",
+        "link": "h2 a"
+      },
+      "filter": false
+    }
+  ]
 }
