@@ -136,10 +136,6 @@
 
   <section class="stats" aria-label="概览统计">
     <div class="stat"><b id="stTotal">0</b><span>收录项目</span></div>
-    <div class="stat"><b id="stGd">0</b><span>广东</span></div>
-    <div class="stat"><b id="stZj">0</b><span>浙江</span></div>
-    <div class="stat"><b id="stJs">0</b><span>江苏</span></div>
-    <div class="stat"><b id="stSd">0</b><span>山东</span></div>
   </section>
 
   <section class="insight" aria-label="态势感知">
@@ -161,10 +157,6 @@
     <div class="group" role="group" aria-label="省份筛选">
       <label>省份</label>
       <button class="chip active" data-prov="all">全部</button>
-      <button class="chip" data-prov="广东">广东</button>
-      <button class="chip" data-prov="浙江">浙江</button>
-      <button class="chip" data-prov="江苏">江苏</button>
-      <button class="chip" data-prov="山东">山东</button>
     </div>
     <div class="group" role="group" aria-label="阶段筛选">
       <label>阶段</label>
@@ -199,7 +191,7 @@
   if (!DATA || !DATA.items) DATA = { items: [] };
 
   var items = DATA.items || [];
-  var provMap = { "广东": "stGd", "浙江": "stZj", "江苏": "stJs", "山东": "stSd" };
+  var provinces = ["广东", "浙江", "江苏", "山东"];
   var STAGE_ORDER = ["规划", "招标", "中标", "更正", "其他"];
 
   function stageClass(stage) {
@@ -212,12 +204,51 @@
 
   function renderStats() {
     document.getElementById("stTotal").textContent = items.length;
-    var counts = { "广东": 0, "浙江": 0, "江苏": 0, "山东": 0 };
+    var counts = {};
+    provinces.forEach(function (p) { counts[p] = 0; });
     items.forEach(function (it) { if (counts[it.province] !== undefined) counts[it.province]++; });
-    Object.keys(counts).forEach(function (p) {
-      document.getElementById(provMap[p]).textContent = counts[p];
+    provinces.forEach(function (p) {
+      var el = document.getElementById("st_" + p);
+      if (el) el.textContent = counts[p];
     });
     document.getElementById("updated").textContent = DATA.generated_at || "";
+  }
+
+  // 从已上架 sources_config.json 读取 regions，动态生成省份筛选与统计（复用 renderSources 的生成模式）
+  function loadRegions() {
+    var host = location.hostname.indexOf("github.io") >= 0 ? location.origin : "https://kennykaipro.github.io";
+    fetch(host + "/bidding-board/sources_config.json").then(function (r) {
+      if (!r.ok) throw new Error("bad");
+      return r.json();
+    }).then(function (cfg) {
+      if (!cfg || !Array.isArray(cfg.regions) || !cfg.regions.length) return;
+      provinces = cfg.regions.map(function (r) { return r.province; });
+      buildProvinceUI();
+      renderStats();
+      render();
+    }).catch(function () {});
+  }
+
+  function buildProvinceUI() {
+    var g = document.querySelector('[aria-label="省份筛选"]');
+    var oldChips = g.querySelectorAll('[data-prov]:not([data-prov="all"])');
+    for (var i = 0; i < oldChips.length; i++) g.removeChild(oldChips[i]);
+    provinces.forEach(function (p) {
+      var b = document.createElement("button");
+      b.className = "chip" + (state.prov === p ? " active" : "");
+      b.setAttribute("data-prov", p);
+      b.textContent = p;
+      g.appendChild(b);
+    });
+    var stats = document.querySelector(".stats");
+    var oldStats = stats.querySelectorAll(".provstat");
+    for (var j = 0; j < oldStats.length; j++) stats.removeChild(oldStats[j]);
+    provinces.forEach(function (p) {
+      var d = document.createElement("div");
+      d.className = "stat provstat";
+      d.innerHTML = '<b id="st_' + p + '">0</b><span>' + esc(p) + '</span>';
+      stats.appendChild(d);
+    });
   }
 
   function renderSources() {
@@ -343,17 +374,17 @@
   }
 
   renderSources();
-  document.querySelectorAll(".filters .chip").forEach(function (chip) {
-    chip.addEventListener("click", function () {
-      var group = chip.parentElement.getAttribute("aria-label");
-      var key = group === "省份筛选" ? "prov" : (group === "来源筛选" ? "src" : "stage");
-      document.querySelectorAll(".filters .chip").forEach(function (c) {
-        if (c.parentElement.getAttribute("aria-label") === group) c.classList.remove("active");
-      });
-      chip.classList.add("active");
-      state[key] = chip.getAttribute("data-" + key);
-      render();
+  document.querySelector(".filters").addEventListener("click", function (ev) {
+    var chip = ev.target.closest(".chip");
+    if (!chip) return;
+    var group = chip.parentElement.getAttribute("aria-label");
+    var key = group === "省份筛选" ? "prov" : (group === "来源筛选" ? "src" : "stage");
+    document.querySelectorAll(".filters .chip").forEach(function (c) {
+      if (c.parentElement.getAttribute("aria-label") === group) c.classList.remove("active");
     });
+    chip.classList.add("active");
+    state[key] = chip.getAttribute("data-" + key);
+    render();
   });
 
   document.getElementById("q").addEventListener("input", function () {
@@ -365,6 +396,7 @@
   renderStats();
   buildInsight();
   render();
+  loadRegions();
 })();
 </script>
 </body>
