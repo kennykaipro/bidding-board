@@ -126,7 +126,8 @@
     "title": "h2 a",
     "date": "p.date",
     "link": "h2 a"
-   }
+   },
+   "filter": false
   },
   {
    "key": "szygcgpt",
@@ -137,7 +138,8 @@
    "page_depth": 1,
    "parse": {
     "type": "css"
-   }
+   },
+   "filter": false
   },
   {
    "key": "szggzy_zfcg",
@@ -152,7 +154,8 @@
     "title": "a",
     "date": "span.news-time",
     "link": "a"
-   }
+   },
+   "filter": false
   },
   {
    "key": "ciesco",
@@ -163,7 +166,8 @@
    "page_depth": 1,
    "parse": {
     "type": "css"
-   }
+   },
+   "filter": false
   },
   {
    "key": "chinaoct",
@@ -174,7 +178,8 @@
    "page_depth": 1,
    "parse": {
     "type": "css"
-   }
+   },
+   "filter": false
   },
   {
    "key": "szu",
@@ -189,7 +194,8 @@
     "title": "a.flex",
     "date": "em",
     "link": "a.flex"
-   }
+   },
+   "filter": false
   },
   {
    "key": "crcement",
@@ -200,7 +206,8 @@
    "page_depth": 1,
    "parse": {
     "type": "css"
-   }
+   },
+   "filter": false
   },
   {
    "key": "job592",
@@ -211,7 +218,8 @@
    "page_depth": 1,
    "parse": {
     "type": "css"
-   }
+   },
+   "filter": false
   },
   {
    "key": "szwb_zbgg",
@@ -226,7 +234,8 @@
     "title": "h2 a",
     "date": "p.date",
     "link": "h2 a"
-   }
+   },
+   "filter": false
   },
   {
    "key": "zjj_sz",
@@ -241,7 +250,8 @@
     "title": "a[title]",
     "date": "span.news-date",
     "link": "a[title]"
-   }
+   },
+   "filter": false
   },
   {
    "key": "cityu_dg",
@@ -252,7 +262,8 @@
    "page_depth": 1,
    "parse": {
     "type": "css"
-   }
+   },
+   "filter": false
   },
   {
    "key": "szwb_zbjh",
@@ -267,7 +278,8 @@
     "title": "h2 a",
     "date": "p.date",
     "link": "h2 a"
-   }
+   },
+   "filter": false
   }
  ]
 }
