@@ -42,6 +42,19 @@
   .src-item .nm { font-weight:600; font-size:13px; } .src-item .ur { font-size:11px; color:var(--ink-2); }
   .src-item .tg { font-size:11px; padding:1px 7px; border-radius:999px; background:#eef2ff; color:#4338ca; margin-right:6px; }
   .src-item .tg.b { background:#ecfdf5; color:#047857; }
+  .src-card { border:1px solid var(--line); border-radius:10px; padding:11px 13px; margin-bottom:10px; background:#fff; }
+  .src-card .src-head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .src-card .nm { font-weight:600; font-size:13px; }
+  .src-card .ur { font-size:11px; color:var(--ink-2); margin-top:3px; word-break:break-all; }
+  .src-card .src-actions { display:flex; gap:6px; flex-wrap:wrap; }
+  .src-detail { margin-top:10px; border-top:1px dashed var(--line); padding-top:10px; font-size:12px; }
+  .src-detail .dgrid { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin-bottom:6px; }
+  .src-detail .dgrid .k { color:var(--ink-2); font-weight:600; white-space:nowrap; }
+  .src-detail .dgrid .v { word-break:break-all; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; color:var(--ink); }
+  .src-detail pre { background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:6px 0 0; overflow:auto; font-size:12px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre-wrap; word-break:break-all; }
+  .edit-badge { display:inline-block; background:#fef3c7; color:#92400e; font-size:12px; font-weight:600; padding:2px 8px; border-radius:999px; margin-bottom:8px; }
+  .kw-stat { display:inline-flex; gap:6px; font-size:12px; color:var(--ink-2); background:#eff6ff; border-radius:8px; padding:4px 10px; margin-bottom:10px; }
+  .kw-stat b { color:var(--brand); }
   .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; }
   .field { display:flex; flex-direction:column; gap:4px; }
   .field.full { grid-column:1/-1; }
@@ -95,6 +108,7 @@
 
   <section class="card">
     <h2><span class="emoji">🔑</span> 关键词与类关键词</h2>
+    <div class="kw-stat" id="kwStat">加载中…</div>
     <div id="kgroups"></div>
     <div class="note">类关键词 = 同义词组：组内任一词命中即收录。例：智能化组填"AI/人工智能/智能体/智慧"，AI 相关公告都能抓到。</div>
     <div class="grid" style="margin-top:12px">
@@ -106,7 +120,10 @@
 
   <section class="card">
     <h2><span class="emoji">🌐</span> 数据源</h2>
-    <div class="note" style="margin-bottom:12px">内置源（无需配置）：中国政府采购网、南方电网、深圳公共资源交易中心。下面是你的自定义网站，填完保存即生效，无需联系 Agent。</div>
+    <div class="note" style="margin-bottom:12px">内置源（无需配置）：中国政府采购网、南方电网、深圳公共资源交易中心。下面是你的自定义网站，点「规则」可查看该网站的抓取逻辑，点「编辑」修改，填完保存即生效，无需联系 Agent。
+      <button class="btn btn-ghost btn-sm" id="btnReloadGh" style="margin-left:8px">↻ 从 GitHub 重载已上架配置</button>
+    </div>
+    <div id="builtinList" style="margin-bottom:14px"></div>
     <div id="srcList"></div>
     <div style="margin-top:12px">
       <div class="grid">
@@ -146,6 +163,9 @@
           <div class="field"><label>每页条数</label><input id="pPSize" type="number" value="50" placeholder="50"></div>
           <div class="field"><label>最多翻页数</label><input id="pMPages" type="number" value="5" placeholder="5"></div>
           <div class="field full"><label>固定参数 JSON（可选）</label><input id="pAParams" placeholder='{"channelId":2850}'></div>
+          <div class="field full"><label>详情链接模板（可选，字段用 {xxx} 占位，如 /jyxxDetails.htm?contentId={id}&code={code}）</label><input id="pLTpl" placeholder="/detail.html?contentId={id}"></div>
+          <div class="field"><label>日期起始字段（可选）</label><input id="pDBegin" placeholder="releaseTimeBegin"></div>
+          <div class="field"><label>日期结束字段（可选）</label><input id="pDEnd" placeholder="releaseTimeEnd"></div>
         </div>
       </details>
 
@@ -159,8 +179,10 @@
         </div>
       </div>
 
-      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <span class="edit-badge" id="editBadge" style="display:none">正在编辑</span>
         <button class="btn btn-primary" id="btnAddSrc">＋ 添加网站</button>
+        <button class="btn btn-ghost btn-sm" id="btnCancelEdit" style="display:none">取消编辑</button>
         <span class="hint">添加后点下方"保存到 GitHub"立即生效</span>
       </div>
     </div>
@@ -176,6 +198,7 @@
 
   <section class="card">
     <h2><span class="emoji">💾</span> 保存全部设置（本地 / GitHub 二选一）</h2>
+    <div class="kw-stat" id="cfgSrcStat">配置来源：加载中…</div>
     <div class="row">
       <button class="btn btn-primary" id="btnLocalSave">💾 本地保存（立即生效）</button>
       <button class="btn btn-ghost" id="btnExport">⬇ 导出 JSON 配置</button>
@@ -201,6 +224,8 @@
   var LS_KEY = "bidding_config_v2";
   var $ = function (id) { return document.getElementById(id); };
   var cfg = { version: 2, settings: { date_range_days: 7, stages: [], auto_detect: true }, keywords: [], sources: [] };
+  var editingIndex = -1;   // 正在编辑的数据源索引，-1 表示未在编辑
+  var cfgSource = "local"; // 当前配置来源：local / github / default
 
   // ---- 读取配置：优先本地 localStorage，其次 GitHub ----
   function load() {
@@ -211,6 +236,7 @@
       cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, local.settings || {});
       cfg.keywords = local.keywords || [];
       cfg.sources = local.sources || [];
+      cfgSource = "local";
       renderAll();
       return;
     }
@@ -221,6 +247,7 @@
         cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, d.settings || {});
         cfg.keywords = d.keywords || [];
         cfg.sources = d.sources || [];
+        cfgSource = "github";
         renderAll();
       })
       .catch(function () { renderAll(); });
@@ -310,7 +337,15 @@
   });
 
   // ---- 关键词 ----
+  function kwCount() {
+    var groups = cfg.keywords || [];
+    var words = 0;
+    groups.forEach(function (g) { words += (g.words || []).length; });
+    return { groups: groups.length, words: words };
+  }
   function renderKeywords() {
+    var stat = kwCount();
+    $("kwStat").innerHTML = '<span>已上架 <b>' + stat.groups + '</b> 个词组 / <b>' + stat.words + '</b> 个关键词</span><span style="opacity:.8">（组内任一词命中即收录，改动后点「保存」生效）</span>';
     var box = $("kgroups"); box.innerHTML = "";
     if (!cfg.keywords.length) { box.innerHTML = '<div class="note">暂无关键词，添加一个词组开始收集。</div>'; }
     cfg.keywords.forEach(function (g, gi) {
@@ -344,34 +379,147 @@
   });
 
   // ---- 数据源 ----
+  function srcDetailHtml(s) {
+    var rows = [];
+    function row(k, v) {
+      if (v === undefined || v === null || v === "") return;
+      if (typeof v === "object") v = JSON.stringify(v);
+      rows.push('<div class="k">' + esc(k) + '</div><div class="v">' + esc(String(v)) + '</div>');
+    }
+    row("名称", s.name); row("类型", s.kind); row("阶段", s.stage);
+    row("列表页", s.list_url); row("翻页规则", s.page_url_pattern || ""); row("翻页深度", s.page_depth);
+    row("关键词过滤", s.filter === false ? "全量收录（不过滤）" : "按关键词过滤");
+    var p = s.parse || {};
+    row("解析方式", p.type === "css" ? "CSS 选择器" : p.type === "regex" ? "正则表达式" : p.type === "api_json" ? "JSON 接口" : (p.type || "未配置"));
+    if (p.type === "css") {
+      row("① 条目 item", p.item); row("② 标题 title", p.title); row("③ 日期 date", p.date);
+      row("④ 链接 link", p.link); row("链接前缀 link_prefix", p.link_prefix);
+    } else if (p.type === "regex") {
+      row("正则 pattern", p.pattern);
+    } else if (p.type === "api_json") {
+      row("API 地址", p.api_url); row("标题字段", p.title_field); row("日期字段", p.date_field);
+      row("链接字段", p.link_field); row("链接模板", p.link_template || "");
+      row("链接前缀", p.link_prefix); row("每页条数", p.api_page_size); row("最多翻页数", p.api_max_pages);
+      row("固定参数", p.api_params || "");
+      row("日期起始字段", s.api_date_begin_field || ""); row("日期结束字段", s.api_date_end_field || "");
+    }
+    if (s.cookies) row("登录 Cookie", "已配置（本地保存，不上传公开）");
+    return '<div class="dgrid">' + rows.join("") + '</div><pre>' + esc(JSON.stringify(s, null, 2)) + '</pre>';
+  }
+  function renderBuiltin() {
+    var box = $("builtinList"); box.innerHTML = "";
+    var arr = [
+      { name: "中国政府采购网", tag: "内置 · 国家级", desc: "全国政府采购公告，按关键词过滤收录" },
+      { name: "南方电网", tag: "内置 · 央企", desc: "南方电网招标采购公告" },
+      { name: "深圳公共资源交易中心", tag: "内置 · 市级", desc: "建设工程/政府采购公告（szggzy API，contentId 详情链接）" }
+    ];
+    arr.forEach(function (b) {
+      var d = document.createElement("div"); d.className = "src-card";
+      d.innerHTML = '<div class="src-head"><div style="min-width:0"><span class="tg b">内置</span><span class="nm">' + esc(b.name) + '</span><div class="ur">' + esc(b.desc) + '</div></div><span class="hint">程序内置，无需配置</span></div>';
+      box.appendChild(d);
+    });
+  }
   function renderSources() {
     var box = $("srcList"); box.innerHTML = "";
     cfg.sources.forEach(function (s, i) {
-      var d = document.createElement("div"); d.className = "src-item";
-      d.innerHTML = '<div style="min-width:0"><span class="tg b">自定义</span><span class="nm">' + esc(s.name) + '</span><div class="ur">' + esc(s.list_url || "") + '</div></div><button class="btn btn-ghost btn-sm" data-dsrc="' + i + '">删除</button>';
+      var d = document.createElement("div"); d.className = "src-card";
+      var filterTag = s.filter === false ? '<span class="tg b">全量</span>' : '<span class="tg">过滤</span>';
+      var stageTag = s.stage ? '<span class="tg">' + esc(s.stage) + '</span>' : "";
+      var typeTag = '<span class="tg">' + esc((s.parse && s.parse.type) || "css") + '</span>';
+      d.innerHTML = '<div class="src-head"><div style="min-width:0"><span class="tg b">自定义</span>' + typeTag + stageTag + filterTag + '<span class="nm">' + esc(s.name) + '</span><div class="ur">' + esc(s.list_url || "") + '</div></div><div class="src-actions">' +
+        '<button class="btn btn-ghost btn-sm" data-view="' + i + '">规则</button>' +
+        '<button class="btn btn-ghost btn-sm" data-edit="' + i + '">编辑</button>' +
+        '<button class="btn btn-ghost btn-sm" data-dsrc="' + i + '">删除</button></div></div>' +
+        '<div class="src-detail" id="sd-' + i + '" style="display:none"></div>';
       box.appendChild(d);
     });
-    if (!cfg.sources.length) box.innerHTML = '<div class="note">暂无自定义网站。</div>';
+    if (!cfg.sources.length) box.innerHTML = '<div class="note">暂无自定义网站，用下方表单添加第一个吧。</div>';
   }
   $("srcList").addEventListener("click", function (e) {
-    if (e.target.dataset.dsrc !== undefined) { cfg.sources.splice(+e.target.dataset.dsrc, 1); renderSources(); }
+    var t = e.target;
+    if (t.dataset.view !== undefined) {
+      var i = +t.dataset.view, el = $("sd-" + i);
+      if (el.style.display === "none") { el.innerHTML = srcDetailHtml(cfg.sources[i]); el.style.display = "block"; t.textContent = "收起"; }
+      else { el.style.display = "none"; t.textContent = "规则"; }
+      return;
+    }
+    if (t.dataset.edit !== undefined) { loadSourceToForm(+t.dataset.edit); return; }
+    if (t.dataset.dsrc !== undefined) {
+      var idx = +t.dataset.dsrc;
+      if (!confirm("确定删除数据源「" + cfg.sources[idx].name + "」？删除后需点「保存到 GitHub」才生效。")) return;
+      cfg.sources.splice(idx, 1);
+      if (editingIndex === idx) cancelEdit();
+      else if (editingIndex > idx) editingIndex -= 1;
+      renderSources();
+    }
   });
   // 解析方式切换
-  $("fType").addEventListener("change", function () {
-    var v = this.value;
-    $("cssFields").style.display = v === "css" ? "" : "none";
-    $("regexFields").style.display = v === "regex" ? "" : "none";
-    $("apiFields").style.display = v === "api_json" ? "" : "none";
-  });
-  $("btnAddSrc").addEventListener("click", function () {
-    var name = $("fName").value.trim(), url = $("fUrl").value.trim(), type = $("fType").value;
-    if (!name || !url) { alert("请填网站名称和列表页 URL"); return; }
-    var p = { key: "src_" + Date.now().toString(36), name: name, kind: "自定义", list_url: url, page_depth: 1, stage: $("fStage").value.trim() || "公告", filter: $("fFilter").value === "true", parse: { type: type } };
+  function syncParseFields(type) {
+    $("cssFields").style.display = type === "css" ? "" : "none";
+    $("regexFields").style.display = type === "regex" ? "" : "none";
+    $("apiFields").style.display = type === "api_json" ? "" : "none";
+  }
+  $("fType").addEventListener("change", function () { syncParseFields(this.value); });
+  function cancelEdit() { resetAddForm(); }
+  function resetAddForm() {
+    editingIndex = -1;
+    $("editBadge").style.display = "none";
+    $("btnCancelEdit").style.display = "none";
+    $("btnAddSrc").textContent = "＋ 添加网站";
+    ["fName","fUrl","pItem","pTitle","pDate","pLink","pPrefix","pPattern","pApiUrl","pTField","pDField","pLField","pPSize","pMPages","pAParams","pLTpl","pDBegin","pDEnd","fStage","fPagePattern"].forEach(function (id) {
+      var el = $(id); if (el) el.value = "";
+    });
+    if ($("pPSize")) $("pPSize").value = "50";
+    if ($("pMPages")) $("pMPages").value = "5";
+  }
+  function loadSourceToForm(i) {
+    var s = cfg.sources[i]; if (!s) return;
+    var p = s.parse || {};
+    editingIndex = i;
+    $("editBadge").style.display = "inline-block";
+    $("editBadge").textContent = "正在编辑：」" + s.name + "「（保存后覆盖该网站配置）";
+    $("btnCancelEdit").style.display = "inline-block";
+    $("btnAddSrc").textContent = "✔ 保存修改";
+    $("fName").value = s.name || "";
+    $("fUrl").value = s.list_url || "";
+    $("fType").value = p.type || "css";
+    $("fStage").value = s.stage || "";
+    $("fFilter").value = s.filter === false ? "false" : "true";
+    $("fPagePattern").value = s.page_url_pattern || "";
+    syncParseFields($("fType").value);
+    if (p.type === "css") {
+      $("pItem").value = p.item || ""; $("pTitle").value = p.title || "a";
+      $("pDate").value = p.date || ""; $("pLink").value = p.link || "a";
+      $("pPrefix").value = p.link_prefix || "";
+    } else if (p.type === "regex") {
+      $("pPattern").value = p.pattern || "";
+    } else if (p.type === "api_json") {
+      $("pApiUrl").value = p.api_url || "";
+      $("pTField").value = p.title_field || "title";
+      $("pDField").value = p.date_field || "releaseTime";
+      $("pLField").value = p.link_field || "";
+      $("pPrefix").value = p.link_prefix || "";
+      $("pPSize").value = p.api_page_size || 50;
+      $("pMPages").value = p.api_max_pages || 5;
+      $("pAParams").value = p.api_params ? JSON.stringify(p.api_params) : "";
+      $("pLTpl").value = p.link_template || "";
+      $("pDBegin").value = s.api_date_begin_field || "";
+      $("pDEnd").value = s.api_date_end_field || "";
+    }
+    var first = $("fName"); if (first && first.scrollIntoView) first.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  function collectSrcFromForm(type, base) {
+    var p = base ? Object.assign({}, base) : {};
+    p.name = $("fName").value.trim();
+    p.list_url = $("fUrl").value.trim();
+    p.stage = $("fStage").value.trim() || base && base.stage || "公告";
+    p.filter = $("fFilter").value === "true";
+    p.parse = { type: type };
     var pp = $("fPagePattern").value.trim();
-    if (pp) { p.page_url_pattern = pp; p.page_depth = 3; }
+    if (pp) { p.page_url_pattern = pp; p.page_depth = 3; } else { delete p.page_url_pattern; }
     if (type === "css") {
       var item = $("pItem").value.trim();
-      if (!item) { alert("CSS 方式请至少填 ① 条目选择器 item"); return; }
+      if (!item) { alert("CSS 方式请至少填 ① 条目选择器 item"); return null; }
       p.parse.item = item;
       p.parse.title = $("pTitle").value.trim() || "a";
       p.parse.date = $("pDate").value.trim() || "";
@@ -379,7 +527,7 @@
       p.parse.link_prefix = $("pPrefix").value.trim() || "";
     } else if (type === "regex") {
       var pat = $("pPattern").value.trim();
-      if (!pat) { alert("正则方式请填正则表达式"); return; }
+      if (!pat) { alert("正则方式请填正则表达式"); return null; }
       p.parse.pattern = pat;
     } else if (type === "api_json") {
       var apiUrl = $("pApiUrl").value.trim();
@@ -392,14 +540,59 @@
       p.parse.api_page_size = parseInt($("pPSize").value || "50", 10) || 50;
       p.parse.api_max_pages = parseInt($("pMPages").value || "5", 10) || 5;
       var ap = $("pAParams").value.trim();
-      if (ap) { try { p.parse.api_params = JSON.parse(ap); } catch (e) { alert("固定参数 JSON 格式不对：\n" + ap); return; } }
+      if (ap) { try { p.parse.api_params = JSON.parse(ap); } catch (e) { alert("固定参数 JSON 格式不对：\n" + ap); return null; } }
+      var lt = $("pLTpl").value.trim();
+      if (lt) p.parse.link_template = lt;
+      var db = $("pDBegin").value.trim(), de = $("pDEnd").value.trim();
+      if (db) p.api_date_begin_field = db;
+      if (de) p.api_date_end_field = de;
     }
-    cfg.sources.push(p);
-    $("fName").value = ""; $("fUrl").value = ""; $("pItem").value = ""; $("pTitle").value = ""; $("pDate").value = ""; $("pLink").value = ""; $("pPrefix").value = ""; $("pPattern").value = ""; $("pApiUrl").value = ""; $("pTField").value = ""; $("pDField").value = ""; $("pLField").value = ""; $("pAParams").value = ""; $("fStage").value = ""; $("fPagePattern").value = "";
+    return p;
+  }
+  $("btnAddSrc").addEventListener("click", function () {
+    var name = $("fName").value.trim(), url = $("fUrl").value.trim(), type = $("fType").value;
+    if (!name || !url) { alert("请填网站名称和列表页 URL"); return; }
+    var base = editingIndex >= 0 ? cfg.sources[editingIndex] : null;
+    var p = collectSrcFromForm(type, base);
+    if (!p) return;
+    if (!p.key) p.key = "src_" + Date.now().toString(36);
+    if (!p.kind) p.kind = "自定义";
+    if (editingIndex >= 0) {
+      cfg.sources[editingIndex] = p;
+      showMsg("ok", "已修改数据源「" + p.name + "」 ✅ 点下方「保存到 GitHub」即生效。");
+    } else {
+      cfg.sources.push(p);
+      showMsg("ok", "已添加数据源「" + p.name + "」 ✅ 点下方「保存到 GitHub」即生效。");
+    }
+    resetAddForm();
     renderSources();
   });
+  $("btnCancelEdit").addEventListener("click", function () { cancelEdit(); });
+  // 从 GitHub 重载已上架配置（覆盖当前页面，并同步到本地缓存）
+  $("btnReloadGh").addEventListener("click", function () {
+    showMsg("", "正在从 GitHub 重载已上架配置…");
+    fetch("https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/" + FILE + "?t=" + Date.now())
+      .then(function (r) { if (!r.ok) throw new Error("config-not-found"); return r.json(); })
+      .then(function (d) {
+        var base = { version: 2, settings: { date_range_days: 7, stages: [], auto_detect: true }, keywords: [], sources: [] };
+        cfg = Object.assign(base, d);
+        cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, d.settings || {});
+        cfg.keywords = d.keywords || [];
+        cfg.sources = d.sources || [];
+        cfgSource = "github";
+        editingIndex = -1;
+        try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) {}
+        renderAll();
+        showMsg("ok", "已从 GitHub 重载已上架配置 ✅ 关键词 " + kwCount().groups + " 组 / " + kwCount().words + " 个，数据源 " + cfg.sources.length + " 个。");
+      })
+      .catch(function () { showMsg("err", "重载失败：GitHub 上还没有 sources_config.json，或网络异常。"); });
+  });
 
-  function renderAll() { renderSettings(); renderKeywords(); renderSources(); }
+  function renderAll() { renderSettings(); renderKeywords(); renderSources(); renderBuiltin(); renderCfgStat(); }
+  function renderCfgStat() {
+    var map = { local: "本地浏览器配置（前台立即生效）", github: "GitHub 已上架配置（每日自动抓取默认读取）", default: "默认配置（未保存自定义）" };
+    $("cfgSrcStat").textContent = "当前页面配置来源：" + (map[cfgSource] || "本地浏览器配置");
+  }
 
   // ---- 保存 ----
   function showMsg(cls, text) {
