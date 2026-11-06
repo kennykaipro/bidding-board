@@ -119,6 +119,18 @@
   </section>
 
   <section class="card">
+    <h2><span class="emoji">🌏</span> 地域 / 省市</h2>
+    <div class="kw-stat" id="rStat">加载中…</div>
+    <div id="rgroups"></div>
+    <div class="note">按省添加，省内城市可增删。仅用于设置页管理，暂不参与抓取过滤。</div>
+    <div class="grid" style="margin-top:12px">
+      <div class="field"><label>省份名称</label><input id="newProvince" placeholder="如：广东"></div>
+      <div class="field"><label>省内城市（逗号/空格分隔）</label><input id="newCities" placeholder="如：广州,深圳,东莞"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="btnAddRegion">＋ 添加省份</button></div>
+  </section>
+
+  <section class="card">
     <h2><span class="emoji">🌐</span> 数据源</h2>
     <div class="note" style="margin-bottom:12px">内置源（无需配置）：中国政府采购网、南方电网、深圳公共资源交易中心。下面是你的自定义网站，点「规则」可查看该网站的抓取逻辑，点「编辑」修改，填完保存即生效，无需联系 Agent。
       <button class="btn btn-ghost btn-sm" id="btnReloadGh" style="margin-left:8px">↻ 从 GitHub 重载已上架配置</button>
@@ -250,6 +262,7 @@
       cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, local.settings || {});
       cfg.keywords = local.keywords || [];
       cfg.sources = local.sources || [];
+      cfg.regions = local.regions || [];
       cfgSource = "local";
       renderAll();
       ensureKeywordsFromGh(); // 本地无关键词时补取 GitHub 已上架关键词
@@ -262,6 +275,7 @@
         cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, d.settings || {});
         cfg.keywords = d.keywords || [];
         cfg.sources = d.sources || [];
+        cfg.regions = d.regions || [];
         cfgSource = "github";
         renderAll();
       })
@@ -271,7 +285,7 @@
   // 旧版 sites-config.json 兼容映射：biddingSites/mediaSites/mediaKeywordList → v2
   function normalizeLegacy(d) {
     if (d && (d.biddingSites || d.mediaSites || d.mediaKeywordList) && !d.sources) {
-      var out = { version: 2, settings: {}, keywords: [], sources: [] };
+      var out = { version: 2, settings: {}, keywords: [], sources: [], regions: [] };
       if (d.settings) out.settings = d.settings;
       if (typeof d.dateRangeDays === "number") out.settings.date_range_days = d.dateRangeDays;
       var sites = (d.biddingSites || []).concat(d.mediaSites || []);
@@ -412,6 +426,46 @@
     cfg.keywords.push({ group: g, words: words });
     $("newGroupName").value = ""; $("newGroupWords").value = "";
     renderKeywords();
+  });
+
+  // ---- 地域/省市（复用关键词交互：省=词组，城市=组内词）----
+  function renderRegions() {
+    if (!Array.isArray(cfg.regions)) cfg.regions = [];
+    var cnt = 0;
+    cfg.regions.forEach(function (p) { cnt += (p.cities || []).length; });
+    $("rStat").innerHTML = '<span>已添加 <b>' + cfg.regions.length + '</b> 个省 / <b>' + cnt + '</b> 个城市</span>';
+    var box = $("rgroups"); box.innerHTML = "";
+    if (!cfg.regions.length) { box.innerHTML = '<div class="note">暂无地域配置，添加一个省份开始。</div>'; }
+    cfg.regions.forEach(function (p, pi) {
+      var d = document.createElement("div"); d.className = "kgroup";
+      var cs = (p.cities || []).map(function (c, ci) {
+        return '<span class="wtag">' + esc(c) + '<span class="x" data-pi="' + pi + '" data-ci="' + ci + '">×</span></span>';
+      }).join("");
+      d.innerHTML = '<div class="gname"><span>' + esc(p.province) + '</span><button class="btn btn-ghost btn-sm" data-rdel="' + pi + '">删除省份</button></div><div class="words">' + cs + '<input style="width:120px;padding:3px 8px;font-size:12px" placeholder="加城市回车" data-addc="' + pi + '"></div>';
+      box.appendChild(d);
+    });
+  }
+  $("rgroups").addEventListener("click", function (e) {
+    var t = e.target;
+    if (t.dataset.rdel !== undefined) { cfg.regions.splice(+t.dataset.rdel, 1); renderRegions(); }
+    if (t.dataset.ci !== undefined) { cfg.regions[+t.dataset.pi].cities.splice(+t.dataset.ci, 1); renderRegions(); }
+  });
+  $("rgroups").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    var t = e.target;
+    if (t.dataset.addc === undefined) return;
+    var w = t.value.trim(); if (!w) return;
+    var p = cfg.regions[+t.dataset.addc];
+    if (!p.cities) p.cities = [];
+    p.cities.push(w); t.value = ""; renderRegions();
+  });
+  $("btnAddRegion").addEventListener("click", function () {
+    var p = $("newProvince").value.trim(), cs = $("newCities").value.trim();
+    if (!p) { alert("请填省份名称"); return; }
+    var cities = cs.split(/[,，、\s]+/).filter(Boolean);
+    cfg.regions.push({ province: p, cities: cities });
+    $("newProvince").value = ""; $("newCities").value = "";
+    renderRegions();
   });
 
   // ---- 数据源 ----
@@ -626,11 +680,12 @@
     fetch("https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/" + FILE + "?t=" + Date.now())
       .then(function (r) { if (!r.ok) throw new Error("config-not-found"); return r.json(); })
       .then(function (d) {
-        var base = { version: 2, settings: { date_range_days: 7, stages: [], auto_detect: true }, keywords: [], sources: [] };
+        var base = { version: 2, settings: { date_range_days: 7, stages: [], auto_detect: true }, keywords: [], sources: [], regions: [] };
         cfg = Object.assign(base, d);
         cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, d.settings || {});
         cfg.keywords = d.keywords || [];
         cfg.sources = d.sources || [];
+        cfg.regions = d.regions || [];
         cfgSource = "github";
         editingIndex = -1;
         try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) {}
@@ -640,7 +695,7 @@
       .catch(function () { showMsg("err", "重载失败：GitHub 上还没有 sources_config.json，或网络异常。"); });
   });
 
-  function renderAll() { renderSettings(); renderKeywords(); renderSources(); renderBuiltin(); renderCfgStat(); }
+  function renderAll() { renderSettings(); renderKeywords(); renderRegions(); renderSources(); renderBuiltin(); renderCfgStat(); }
   function renderCfgStat() {
     var map = { local: "本地浏览器配置（前台立即生效）", github: "GitHub 已上架配置（每日自动抓取默认读取）", default: "默认配置（未保存自定义）" };
     $("cfgSrcStat").textContent = "当前页面配置来源：" + (map[cfgSource] || "本地浏览器配置");
@@ -671,7 +726,7 @@
   }
   function collectPayload() {
     collectSettings();
-    return JSON.stringify({ version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources }, null, 2);
+    return JSON.stringify({ version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources, regions: cfg.regions }, null, 2);
   }
   // ---- 细粒度 Token 提示：github_pat_ 不兼容 ----
   $("tokenInput").addEventListener("input", function () {
@@ -681,7 +736,7 @@
   // ---- 本地保存（localStorage，立即生效）----
   $("btnLocalSave").addEventListener("click", function () {
     collectSettings();
-    var payload = { version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources };
+    var payload = { version: 2, settings: cfg.settings, keywords: cfg.keywords, sources: cfg.sources, regions: cfg.regions };
     try {
       localStorage.setItem(LS_KEY, JSON.stringify(payload));
       renderAll();
@@ -713,10 +768,11 @@
         var d = JSON.parse(ev.target.result);
         var norm = normalizeLegacy(d);
         if (!norm || !norm.settings) { throw new Error("格式不正确"); }
-        cfg = Object.assign({}, { version: 2, settings: { date_range_days: 7, stages: [], auto_detect: true }, keywords: [], sources: [] }, norm);
+        cfg = Object.assign({}, { version: 2, settings: { date_range_days: 7, stages: [], auto_detect: true }, keywords: [], sources: [], regions: [] }, norm);
         cfg.settings = Object.assign({ date_range_days: 7, stages: [], auto_detect: true }, norm.settings || {});
         cfg.keywords = norm.keywords || [];
         cfg.sources = norm.sources || [];
+        cfg.regions = norm.regions || [];
         // 导入即视为本地配置覆盖，立即生效
         try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) {}
         renderAll();
