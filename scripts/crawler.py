@@ -1058,6 +1058,7 @@ def main():
             it["source_kind"] = src["kind"]
             if not src.get("filter", True):
                 it["_nofilter"] = True
+                it["_src_province"] = src.get("source_province", "") or ""
         all_items.extend(parsed)
     print(f"[ai] 本次 AI 调用次数: {total_ai_calls}（纯规则探测，0 积分）"
           + (f" | 触发探测: {', '.join(total_detected)}" if total_detected else "")
@@ -1083,7 +1084,7 @@ def main():
         if stages_selected and stage not in stages_selected:
             continue
         if it.get("_nofilter"):
-            it["province"] = ""
+            it["province"] = it.get("_src_province", "") or ""
             it["matched_keywords"] = []
             filtered.append(it)
             continue
