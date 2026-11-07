@@ -16,6 +16,7 @@
 """
 import argparse
 import base64
+import hashlib
 import json
 import os
 import random
@@ -466,9 +467,13 @@ def parse_source(src, cutoff: str, days: int = 7):
     return items
 
 
-def fetch_api_json(url: str, body: dict, retries: int = 3, form: bool = False, referer: str = ""):
+def fetch_api_json(url: str, body: dict, retries: int = 3, form: bool = False, referer: str = "",
+                   sign_key: str = ""):
     """POST JSON 接口抓取（深圳公共资源交易中心模式）。
-    form=True 时以 application/x-www-form-urlencoded 提交（webBuilder 系列接口）。"""
+    form=True 时以 application/x-www-form-urlencoded 提交（webBuilder 系列接口）。
+    sign_key 非空时启用福建式签名：body 注入毫秒时间戳 ts，
+    对排除空值后的参数按 key 大写排序拼接（对象/数组用 JSON 序列化），
+    计算 MD5(密钥+拼接串) 小写作 portal-sign 头。"""
     headers = dict(BROWSER_HEADERS)
     if form:
         headers.update({"Content-Type": "application/x-www-form-urlencoded"})
@@ -479,6 +484,22 @@ def fetch_api_json(url: str, body: dict, retries: int = 3, form: bool = False, r
         headers.update({"Content-Type": "application/json",
                         "Referer": referer or "https://www.szggzy.com/xxgk/list.html"})
         payload = json.dumps(body)
+    if sign_key:
+        ts = int(time.time() * 1000)
+        if form:
+            body["ts"] = ts
+            payload = body
+        else:
+            body = dict(body)
+            body["ts"] = ts
+            payload = json.dumps(body)
+        # 排除空值后签名
+        p = {k: v for k, v in body.items() if v not in ("", None)}
+        concat = ""
+        for k in sorted(p.keys(), key=lambda k: k.upper()):
+            v = p[k]
+            concat += k + (json.dumps(v, separators=(",", ":")) if isinstance(v, (dict, list)) else str(v))
+        headers["portal-sign"] = hashlib.md5((sign_key + concat).encode()).hexdigest().lower()
     last = None
     for attempt in range(1, retries + 1):
         try:
@@ -699,6 +720,22 @@ def parse_custom_source(src, cutoff: str, root: str = "", auto_detect: bool = Tr
     return items, stats
 
 
+def _aes_decrypt_payload(data, key: str, iv: str, encoding: str = "base64"):
+    """福建式响应解密：密文先按 encoding 解码，再 AES-128-CBC PKCS7 解密为 UTF-8 文本。"""
+    try:
+        from Crypto.Cipher import AES
+        from Crypto.Util.Padding import unpad
+    except Exception:  # noqa: BLE001
+        try:
+            from Cryptodome.Cipher import AES
+            from Cryptodome.Util.Padding import unpad
+        except Exception:  # noqa: BLE001
+            return None
+    raw = base64.b64decode(data) if encoding == "base64" else bytes.fromhex(data)
+    cipher = AES.new(key.encode(), AES.MODE_CBC, iv.encode())
+    return unpad(cipher.decrypt(raw), 16).decode("utf-8", errors="ignore")
+
+
 def _parse_api_json_custom(src, cutoff: str, end_date: str):
     """通用 JSON-API 源：POST JSON 请求，配置 api_params / api_page_size / 字段映射。
     兼容两种配置位置：顶层（旧）或 src.parse 内（admin 自助表单写入的 v2 结构）。
@@ -707,7 +744,10 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
       - api_list_field：点分路径定位列表字段（如 custom.infodata / result.records），
         中途遇到 JSON 字符串自动解析（陕西 esinteligentsearch content 为内层字符串）
       - api_page_field / api_size_field：自定义分页参数名（默认 page/size）
-      - api_referer：自定义 Referer 头"""
+      - api_referer：自定义 Referer 头
+      - api_sign_key：福建式 MD5 签名（portal-sign）
+      - api_decrypt：响应 Data 字段 AES-CBC 解密，{key, iv, encoding}
+      - api_page_start：起始页码（部分接口从 1 开始，如福建 PageNo）"""
     parse = src.get("parse") or {}
     api_url = src.get("api_url") or parse.get("api_url") or src.get("list_url")
     params = dict(src.get("api_params", {}) or parse.get("api_params", {}) or {})
@@ -721,24 +761,41 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
     list_field = src.get("api_list_field", "") or parse.get("api_list_field", "") or ""
     page_field = src.get("api_page_field", "") or parse.get("api_page_field", "") or "page"
     size_field = src.get("api_size_field", "") or parse.get("api_size_field", "") or "size"
+    page_start = int(src.get("api_page_start", parse.get("api_page_start", 0)) or 0)
     form_mode = bool(src.get("api_form") or parse.get("api_form") or False)
     referer = src.get("api_referer", "") or parse.get("api_referer", "") or ""
+    sign_key = src.get("api_sign_key", "") or parse.get("api_sign_key", "") or ""
+    decrypt_cfg = src.get("api_decrypt", {}) or parse.get("api_decrypt", {}) or {}
     items = []
-    for page in range(int(src.get("api_max_pages", parse.get("api_max_pages", 5)) or 5)):
+    for page in range(page_start, page_start + int(src.get("api_max_pages", parse.get("api_max_pages", 5)) or 5)):
         body = dict(params)
         body.update({page_field: page, size_field: size})
         if src.get("api_date_begin_field"):
-            body[src["api_date_begin_field"]] = cutoff
+            body[src["api_date_begin_field"]] = f"{cutoff[:4]}-{cutoff[4:6]}-{cutoff[6:8]}"
         if src.get("api_date_end_field"):
-            body[src["api_date_end_field"]] = end_date
+            body[src["api_date_end_field"]] = f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]}"
         if src.get("api_time_field"):
             body[src["api_time_field"]] = [{"fieldName": "infodate",
                                             "startTime": f"{cutoff} 00:00:00",
                                             "endTime": f"{end_date} 23:59:59"}]
         try:
-            data = fetch_api_json(api_url, body, form=form_mode, referer=referer)
+            data = fetch_api_json(api_url, body, form=form_mode, referer=referer, sign_key=sign_key)
         except Exception as exc:  # noqa: BLE001
             items.append({"error": f"{api_url}: {exc}"})
+            break
+        # 响应解密（福建式：Data 字段 base64+AES 后为 JSON 字符串）
+        if decrypt_cfg and isinstance(data, dict):
+            enc = data.get("Data") or data.get("data") or ""
+            dec = _aes_decrypt_payload(enc, decrypt_cfg.get("key", ""), decrypt_cfg.get("iv", ""),
+                                       decrypt_cfg.get("encoding", "base64"))
+            if dec:
+                try:
+                    data = json.loads(dec)
+                except Exception:  # noqa: BLE001
+                    data = None
+            else:
+                data = None
+        if data is None:
             break
         # 定位列表字段
         content = data
