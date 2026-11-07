@@ -1,812 +1,890 @@
 {
-  "version": 5,
-  "settings": {
-    "date_range_days": 180,
-    "stages": []
+ "version": 6,
+ "settings": {
+  "date_range_days": 180,
+  "stages": []
+ },
+ "keywords": [
+  {
+   "group": "信息化类",
+   "words": [
+    "信息化建设",
+    "数字化",
+    "数据平台",
+    "智慧城市",
+    "数字政府",
+    "系统集成"
+   ]
   },
-  "keywords": [
-    {
-      "group": "信息化类",
-      "words": [
-        "信息化建设",
-        "数字化",
-        "数据平台",
-        "智慧城市",
-        "数字政府",
-        "系统集成"
-      ]
+  {
+   "group": "智能化类",
+   "words": [
+    "智能化工程",
+    "弱电智能化",
+    "智慧园区",
+    "智慧楼宇",
+    "安防监控",
+    "AI应用"
+   ]
+  },
+  {
+   "group": "音视频类",
+   "words": [
+    "音视频",
+    "视频会议",
+    "会议室改造",
+    "LED显示",
+    "音响扩声",
+    "多媒体",
+    "音频",
+    "音响",
+    "扩声",
+    "会议",
+    "多功能",
+    "舞台机械",
+    "灯光",
+    "投影",
+    "视频",
+    "LED",
+    "显示",
+    "声光电",
+    "礼堂",
+    "阶梯教室",
+    "音乐厅"
+   ]
+  }
+ ],
+ "sources": [
+  {
+   "key": "szwb_clsb",
+   "name": "工务署-材料设备库",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "http://szwb.sz.gov.cn/gwszwfw/clsbcx/index_2.html",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "ul.inside-news > li",
+    "title": "h2 a",
+    "date": "p.date",
+    "link": "h2 a"
+   },
+   "filter": false
+  },
+  {
+   "key": "szygcgpt",
+   "name": "深圳阳光采购平台",
+   "kind": "国企",
+   "stage": "公告",
+   "list_url": "https://ygcg.szexgrp.com/jyxx",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "https://ygcg.szexgrp.com/api/v1/trade/content/page",
+    "api_params": {
+     "channelId": 4161,
+     "fields": null,
+     "title": "",
+     "bidSectionNumber": "",
+     "purchaseCom": "",
+     "siteId": 216,
+     "keyword": ""
     },
-    {
-      "group": "智能化类",
-      "words": [
-        "智能化工程",
-        "弱电智能化",
-        "智慧园区",
-        "智慧楼宇",
-        "安防监控",
-        "AI应用"
-      ]
+    "api_page_size": 50,
+    "api_max_pages": 5,
+    "title_field": "noticeTitle",
+    "date_field": "publishTime",
+    "link_template": "/jyxxDetails.htm?bidSectionNumber={bidSectionNumber}&contentId={id}&code={code}",
+    "link_prefix": "https://ygcg.szexgrp.com"
+   },
+   "filter": false,
+   "api_date_begin_field": "releaseTimeBegin",
+   "api_date_end_field": "releaseTimeEnd"
+  },
+  {
+   "key": "szggzy_zfcg",
+   "name": "中国·深圳政府采购",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "http://zfcg.szggzy.com:8081/gsgg/002001/list.html",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "ul.news-items > li",
+    "title": "a",
+    "date": "span.news-time",
+    "link": "a"
+   },
+   "filter": false
+  },
+  {
+   "key": "ciesco",
+   "name": "招商局集团采购网",
+   "kind": "央企",
+   "stage": "公告",
+   "list_url": "https://dzzb.ciesco.com.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css"
+   },
+   "filter": false
+  },
+  {
+   "key": "chinaoct",
+   "name": "华侨城集团采购网",
+   "kind": "央企",
+   "stage": "公告",
+   "list_url": "https://scm.chinaoct.com/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css"
+   },
+   "filter": false
+  },
+  {
+   "key": "szu",
+   "name": "深圳大学采购网",
+   "kind": "教育",
+   "stage": "公告",
+   "list_url": "https://bidding.szu.edu.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "li:has(em)",
+    "title": "a.flex",
+    "date": "em",
+    "link": "a.flex"
+   },
+   "filter": false
+  },
+  {
+   "key": "crcement",
+   "name": "华润水泥采购网",
+   "kind": "央企",
+   "stage": "公告",
+   "list_url": "https://b2b.crcement.com/#/home/index-more",
+   "page_depth": 1,
+   "parse": {
+    "type": "css"
+   },
+   "filter": false
+  },
+  {
+   "key": "job592",
+   "name": "招标信息网(广东)",
+   "kind": "第三方",
+   "stage": "公告",
+   "list_url": "https://my.job592.com/baike/myzb_search.action",
+   "page_depth": 1,
+   "parse": {
+    "type": "css"
+   },
+   "filter": false
+  },
+  {
+   "key": "szwb_zbgg",
+   "name": "工务署-招标公告",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "http://szwb.sz.gov.cn/gwszwfw/ztbcx/zhaobgg/index.html",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "ul.inside-news > li",
+    "title": "h2 a",
+    "date": "p.date",
+    "link": "h2 a"
+   },
+   "filter": false
+  },
+  {
+   "key": "zjj_sz",
+   "name": "深圳市住房和建设局",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "http://zjj.sz.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "ul.news-list > li",
+    "title": "a[title]",
+    "date": "span.news-date",
+    "link": "a[title]"
+   },
+   "filter": false
+  },
+  {
+   "key": "cityu_dg",
+   "name": "香港城市大学东莞",
+   "kind": "教育",
+   "stage": "公告",
+   "list_url": "https://pur.cityu-dg.edu.cn/cms/document/indexList.html",
+   "page_depth": 1,
+   "parse": {
+    "type": "css"
+   },
+   "filter": false
+  },
+  {
+   "key": "szwb_zbjh",
+   "name": "工务署-招标计划",
+   "kind": "政府",
+   "stage": "规划",
+   "list_url": "http://szwb.sz.gov.cn/gwszwfw/ztbcx/zbjh/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "ul.inside-news > li",
+    "title": "h2 a",
+    "date": "p.date",
+    "link": "h2 a"
+   },
+   "filter": false
+  },
+  {
+   "key": "bj_ggzyfw",
+   "name": "北京市公共资源交易服务平台",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "https://ggzyfw.beijing.gov.cn/",
+   "page_depth": 1,
+   "parse": {},
+   "filter": true
+  },
+  {
+   "key": "tj_ggzy",
+   "name": "天津市公共资源交易网",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "https://ggzy.zwfwb.tj.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "item": "ul.news-items.tab-panel li.clearfix",
+    "title": "a",
+    "date": "span.date",
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "zj_pubsvc",
+   "name": "浙江省公共资源交易服务平台",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "https://ggzy.zj.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "item": "ul.list-view li.list-view-cell",
+    "title": "a div.item-name",
+    "date": "div.item-time",
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "sd_ggzy",
+   "name": "山东省公共资源交易网",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "https://ggzyjyzx.shandong.gov.cn/col/col209477/index.html",
+   "page_depth": 1,
+   "parse": {
+    "item": "ul.section2-content li",
+    "title": "a",
+    "date": "span",
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "cq_zbtb",
+   "name": "重庆市招标投标综合网",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "https://www.cqggzy.com/?main=014005",
+   "page_depth": 1,
+   "parse": {
+    "item": "div.menu-content li",
+    "title": "a",
+    "date": "",
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "nat_ggzy",
+   "name": "全国公共资源交易平台",
+   "kind": "国家级",
+   "stage": "公告",
+   "list_url": "https://www.ggzy.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "item": "div.main_list_on ul li",
+    "title": "a",
+    "date": "span",
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "sx_prec",
+   "name": "全国公共资源交易平台（山西省）",
+   "kind": "政府",
+   "stage": "公告",
+   "list_url": "https://prec.sxzwfw.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "regex",
+    "pattern": "<a[^>]+href=\"(?P<link>[^\"]+)\"[^>]*class=\"data_jyxx[^\"]*\"[^>]*>\\s*<div>\\s*<span>(?P<title>[^<]+)</span>\\s*<span>(?P<date>[^<]+)</span>"
+   },
+   "filter": true
+  },
+  {
+   "key": "yq_ygz",
+   "name": "渝e招阳光智采平台",
+   "kind": "企业",
+   "stage": "公告",
+   "list_url": "https://www.yangguangguoqi.com/",
+   "page_depth": 1,
+   "parse": {
+    "item": "div.inewslist ul",
+    "title": "li.txt a",
+    "date": "li.date",
+    "link": "li.txt a"
+   },
+   "filter": true
+  },
+  {
+   "key": "ah_jsgc",
+   "name": "安徽省公共资源交易监管网",
+   "kind": "政府",
+   "stage": "招标公告",
+   "list_url": "https://ggzy.ah.gov.cn/jsgc/list",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "li.list-item",
+    "title": "a",
+    "date": null,
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "nx_ggzy",
+   "name": "宁夏回族自治区公共资源交易网",
+   "kind": "政府",
+   "stage": "招标公告",
+   "list_url": "https://ggzyjy.fzggw.nx.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "li.electronic-lists-item",
+    "title": "a",
+    "date": null,
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "hub_ggzy",
+   "name": "湖北省公共资源电子交易服务系统",
+   "kind": "政府",
+   "stage": "项目信息",
+   "list_url": "https://www.hbggzyfwpt.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "div.changeCon li",
+    "title": "a",
+    "date": null,
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "hlj_ggzy",
+   "name": "黑龙江公共资源交易网",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://ggzyjyw.hlj.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "li.wb-data-list",
+    "title": "a",
+    "date": null,
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "jl_ggzy",
+   "name": "吉林省公共资源交易中心",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://www.ggzyzx.jl.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "div.tab_2_main ul li",
+    "title": "a",
+    "date": null,
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "jx_ggzy",
+   "name": "江西省公共资源交易平台",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "http://ggzy.jiangxi.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "http://ggzy.jiangxi.gov.cn/XZinterface/rest/esinteligentsearch/getFullTextDataNew",
+    "api_list_field": "result.records",
+    "api_page_field": "pn",
+    "api_size_field": "rn",
+    "api_page_size": 50,
+    "api_max_pages": 8,
+    "api_time_field": "time",
+    "api_params": {
+     "esdsid": "1",
+     "token": "",
+     "sdt": "",
+     "edt": "",
+     "wd": "",
+     "inc_wd": "",
+     "exc_wd": "",
+     "fields": "title",
+     "cnum": "",
+     "sort": "{\"webdate\":\"0\"}",
+     "ssort": "title",
+     "cl": 1000,
+     "cutIngore": "title;linkurl",
+     "terminal": "",
+     "condition": [],
+     "time": [],
+     "highlights": "title",
+     "statistics": null,
+     "unionCondition": null,
+     "accuracy": "",
+     "noParticiple": "1",
+     "searchRange": [],
+     "isBusiness": "1"
     },
-    {
-      "group": "音视频类",
-      "words": [
-        "音视频",
-        "视频会议",
-        "会议室改造",
-        "LED显示",
-        "音响扩声",
-        "多媒体",
-        "音频",
-        "音响",
-        "扩声",
-        "会议",
-        "多功能",
-        "舞台机械",
-        "灯光",
-        "投影",
-        "视频",
-        "LED",
-        "显示",
-        "声光电",
-        "礼堂",
-        "阶梯教室",
-        "音乐厅"
-      ]
-    }
-  ],
-  "sources": [
-    {
-      "key": "szwb_clsb",
-      "name": "工务署-材料设备库",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "http://szwb.sz.gov.cn/gwszwfw/clsbcx/index_2.html",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "ul.inside-news > li",
-        "title": "h2 a",
-        "date": "p.date",
-        "link": "h2 a"
-      },
-      "filter": false
+    "title_field": "title",
+    "date_field": "webdate",
+    "link_field": "linkurl",
+    "link_prefix": "http://ggzy.jiangxi.gov.cn",
+    "api_referer": "http://ggzy.jiangxi.gov.cn/"
+   },
+   "filter": true
+  },
+  {
+   "key": "xj_ggzy",
+   "name": "新疆维吾尔自治区公共资源交易网",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "http://ggzy.xinjiang.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "css",
+    "item": "div.trade-list a.link-item",
+    "title": "span.title",
+    "date": "span.date",
+    "link": "a"
+   },
+   "filter": true
+  },
+  {
+   "key": "sc_ggzy",
+   "name": "四川省公共资源交易信息网",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://ggzyjy.sc.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "https://ggzyjy.sc.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew",
+    "api_list_field": "result.records",
+    "api_page_field": "pn",
+    "api_size_field": "rn",
+    "api_page_size": 50,
+    "api_max_pages": 8,
+    "api_time_field": "time",
+    "api_params": {
+     "esdsid": "1",
+     "token": "",
+     "sdt": "",
+     "edt": "",
+     "wd": "",
+     "inc_wd": "",
+     "exc_wd": "",
+     "fields": "title",
+     "cnum": "",
+     "sort": "{\"webdate\":\"0\"}",
+     "ssort": "title",
+     "cl": 1000,
+     "cutIngore": "title;linkurl",
+     "terminal": "",
+     "condition": [],
+     "time": [],
+     "highlights": "title",
+     "statistics": null,
+     "unionCondition": null,
+     "accuracy": "",
+     "noParticiple": "1",
+     "searchRange": [],
+     "isBusiness": "1"
     },
-    {
-      "key": "szygcgpt",
-      "name": "深圳阳光采购平台",
-      "kind": "国企",
-      "stage": "公告",
-      "list_url": "https://ygcg.szexgrp.com/jyxx",
-      "page_depth": 1,
-      "parse": {
-        "type": "api_json",
-        "api_url": "https://ygcg.szexgrp.com/api/v1/trade/content/page",
-        "api_params": {
-          "channelId": 4161,
-          "fields": null,
-          "title": "",
-          "bidSectionNumber": "",
-          "purchaseCom": "",
-          "siteId": 216,
-          "keyword": ""
-        },
-        "api_page_size": 50,
-        "api_max_pages": 5,
-        "title_field": "noticeTitle",
-        "date_field": "publishTime",
-        "link_template": "/jyxxDetails.htm?bidSectionNumber={bidSectionNumber}&contentId={id}&code={code}",
-        "link_prefix": "https://ygcg.szexgrp.com"
-      },
-      "filter": false,
-      "api_date_begin_field": "releaseTimeBegin",
-      "api_date_end_field": "releaseTimeEnd"
+    "title_field": "title",
+    "date_field": "webdate",
+    "link_field": "linkurl",
+    "link_prefix": "https://ggzyjy.sc.gov.cn",
+    "api_referer": "https://ggzyjy.sc.gov.cn/jyxx/002001/transactionInfo.html"
+   },
+   "filter": true
+  },
+  {
+   "key": "qh_ggzy",
+   "name": "青海省公共资源交易网",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "http://www.qhggzyjy.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "http://www.qhggzyjy.gov.cn/inteligentsearch/rest/inteligentSearch/getFullTextData",
+    "api_list_field": "result.records",
+    "api_page_field": "pn",
+    "api_size_field": "rn",
+    "api_page_size": 50,
+    "api_max_pages": 8,
+    "api_time_field": "time",
+    "api_params": {
+     "token": "",
+     "sdt": "",
+     "edt": "",
+     "wd": "",
+     "inc_wd": "",
+     "exc_wd": "",
+     "fields": "title",
+     "cnum": "001;002;003;004;005;006;007;008;009;010",
+     "sort": "{\"webdate\":\"0\"}",
+     "ssort": "title",
+     "cl": 1000,
+     "terminal": "",
+     "condition": [],
+     "time": [],
+     "highlights": "title",
+     "statistics": null,
+     "unionCondition": null,
+     "accuracy": "",
+     "noParticiple": "1",
+     "searchRange": [],
+     "isBusiness": "1"
     },
-    {
-      "key": "szggzy_zfcg",
-      "name": "中国·深圳政府采购",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "http://zfcg.szggzy.com:8081/gsgg/002001/list.html",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "ul.news-items > li",
-        "title": "a",
-        "date": "span.news-time",
-        "link": "a"
-      },
-      "filter": false
+    "title_field": "title",
+    "date_field": "webdate",
+    "link_field": "linkurl",
+    "link_prefix": "http://www.qhggzyjy.gov.cn",
+    "api_referer": "http://www.qhggzyjy.gov.cn/ggzy/jyxx/001001/transinfo_list.html"
+   },
+   "filter": true
+  },
+  {
+   "key": "hen_ggzy",
+   "name": "河南省公共资源交易中心",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://hnsggzyjy.henan.gov.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "http://hnsggzyjy.henan.gov.cn/EpointWebBuilder/rest/frontAppCustomAction/getPageInfoListNewYzm",
+    "api_form": true,
+    "api_list_field": "custom.infodata",
+    "api_page_field": "pageIndex",
+    "api_size_field": "pageSize",
+    "api_page_size": 50,
+    "api_max_pages": 6,
+    "api_params": {
+     "siteGuid": "7eb5f7f1-9041-43ad-8e13-8fcb82ea831a",
+     "categoryNum": "002",
+     "jytype": "",
+     "xiaqucode": "4100"
     },
-    {
-      "key": "ciesco",
-      "name": "招商局集团采购网",
-      "kind": "央企",
-      "stage": "公告",
-      "list_url": "https://dzzb.ciesco.com.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css"
-      },
-      "filter": false
+    "title_field": "title",
+    "date_field": "startdate",
+    "link_field": "infourl",
+    "link_prefix": "https://hnsggzyjy.henan.gov.cn",
+    "api_referer": "https://hnsggzyjy.henan.gov.cn/"
+   },
+   "filter": true
+  },
+  {
+   "key": "sx_ggzy",
+   "name": "陕西省公共资源交易平台",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://www.sxggzyjy.cn/",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "https://www.sxggzyjy.cn/inteligentsearch_new/rest/esinteligentsearch/getFullTextDataNew",
+    "api_list_field": "content.result.records",
+    "api_page_field": "pn",
+    "api_size_field": "rn",
+    "api_page_size": 50,
+    "api_max_pages": 8,
+    "api_time_field": "time",
+    "api_params": {
+     "esdsid": "1",
+     "token": "",
+     "sdt": "",
+     "edt": "",
+     "wd": "",
+     "inc_wd": "",
+     "exc_wd": "",
+     "fields": "title",
+     "cnum": "",
+     "sort": "{\"webdate\":\"0\"}",
+     "ssort": "title",
+     "cl": 1000,
+     "cutIngore": "title;linkurl",
+     "terminal": "",
+     "condition": [],
+     "time": [],
+     "highlights": "title",
+     "statistics": null,
+     "unionCondition": null,
+     "accuracy": "",
+     "noParticiple": "1",
+     "searchRange": [],
+     "isBusiness": "1"
     },
-    {
-      "key": "chinaoct",
-      "name": "华侨城集团采购网",
-      "kind": "央企",
-      "stage": "公告",
-      "list_url": "https://scm.chinaoct.com/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css"
-      },
-      "filter": false
+    "title_field": "title",
+    "date_field": "webdate",
+    "link_field": "linkurl",
+    "link_prefix": "https://www.sxggzyjy.cn",
+    "api_referer": "https://www.sxggzyjy.cn/"
+   },
+   "filter": true
+  },
+  {
+   "key": "fj_ggzy_gcjs",
+   "name": "福建省公共资源交易平台·工程建设",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://ggzyfw.fj.gov.cn/business/list",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "https://ggzyfw.fj.gov.cn/FwPortalApi/Trade/TradeInfo",
+    "api_list_field": "Table",
+    "api_page_field": "PageNo",
+    "api_size_field": "pageSize",
+    "api_page_size": 50,
+    "api_page_start": 1,
+    "api_max_pages": 10,
+    "api_sign_key": "B3978D054A72A7002063637CCDF6B2E5",
+    "api_decrypt": {
+     "key": "EB444973714E4A40876CE66BE45D5930",
+     "iv": "B5A8904209931867",
+     "encoding": "base64"
     },
-    {
-      "key": "szu",
-      "name": "深圳大学采购网",
-      "kind": "教育",
-      "stage": "公告",
-      "list_url": "https://bidding.szu.edu.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "li:has(em)",
-        "title": "a.flex",
-        "date": "em",
-        "link": "a.flex"
-      },
-      "filter": false
+    "api_date_begin_field": "BeginTime",
+    "api_date_end_field": "EndTime",
+    "api_params": {
+     "AREACODE": "",
+     "M_PROJECT_TYPE": "",
+     "KIND": "GCJS",
+     "GGTYPE": "1,4,5,6",
+     "PROTYPE": "",
+     "NAME": ""
     },
-    {
-      "key": "crcement",
-      "name": "华润水泥采购网",
-      "kind": "央企",
-      "stage": "公告",
-      "list_url": "https://b2b.crcement.com/#/home/index-more",
-      "page_depth": 1,
-      "parse": {
-        "type": "css"
-      },
-      "filter": false
+    "title_field": "NAME",
+    "date_field": "TM",
+    "link_template": "https://ggzyfw.fj.gov.cn/business/detail?name={NAME}&cid={M_ID}&type={KIND}",
+    "api_referer": "https://ggzyfw.fj.gov.cn/business/list"
+   },
+   "filter": true
+  },
+  {
+   "key": "fj_ggzy_zfcg",
+   "name": "福建省公共资源交易平台·政府采购",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://ggzyfw.fj.gov.cn/business/list",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "https://ggzyfw.fj.gov.cn/FwPortalApi/Trade/TradeInfo",
+    "api_list_field": "Table",
+    "api_page_field": "PageNo",
+    "api_size_field": "pageSize",
+    "api_page_size": 50,
+    "api_page_start": 1,
+    "api_max_pages": 10,
+    "api_sign_key": "B3978D054A72A7002063637CCDF6B2E5",
+    "api_decrypt": {
+     "key": "EB444973714E4A40876CE66BE45D5930",
+     "iv": "B5A8904209931867",
+     "encoding": "base64"
     },
-    {
-      "key": "job592",
-      "name": "招标信息网(广东)",
-      "kind": "第三方",
-      "stage": "公告",
-      "list_url": "https://my.job592.com/baike/myzb_search.action",
-      "page_depth": 1,
-      "parse": {
-        "type": "css"
-      },
-      "filter": false
+    "api_date_begin_field": "BeginTime",
+    "api_date_end_field": "EndTime",
+    "api_params": {
+     "AREACODE": "",
+     "M_PROJECT_TYPE": "",
+     "KIND": "ZFCG",
+     "GGTYPE": "1,4,5,6",
+     "PROTYPE": "",
+     "NAME": ""
     },
-    {
-      "key": "szwb_zbgg",
-      "name": "工务署-招标公告",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "http://szwb.sz.gov.cn/gwszwfw/ztbcx/zhaobgg/index.html",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "ul.inside-news > li",
-        "title": "h2 a",
-        "date": "p.date",
-        "link": "h2 a"
-      },
-      "filter": false
-    },
-    {
-      "key": "zjj_sz",
-      "name": "深圳市住房和建设局",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "http://zjj.sz.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "ul.news-list > li",
-        "title": "a[title]",
-        "date": "span.news-date",
-        "link": "a[title]"
-      },
-      "filter": false
-    },
-    {
-      "key": "cityu_dg",
-      "name": "香港城市大学东莞",
-      "kind": "教育",
-      "stage": "公告",
-      "list_url": "https://pur.cityu-dg.edu.cn/cms/document/indexList.html",
-      "page_depth": 1,
-      "parse": {
-        "type": "css"
-      },
-      "filter": false
-    },
-    {
-      "key": "szwb_zbjh",
-      "name": "工务署-招标计划",
-      "kind": "政府",
-      "stage": "规划",
-      "list_url": "http://szwb.sz.gov.cn/gwszwfw/ztbcx/zbjh/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "ul.inside-news > li",
-        "title": "h2 a",
-        "date": "p.date",
-        "link": "h2 a"
-      },
-      "filter": false
-    },
-    {
-      "key": "bj_ggzyfw",
-      "name": "北京市公共资源交易服务平台",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "https://ggzyfw.beijing.gov.cn/",
-      "page_depth": 1,
-      "parse": {},
-      "filter": true
-    },
-    {
-      "key": "tj_ggzy",
-      "name": "天津市公共资源交易网",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "https://ggzy.zwfwb.tj.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "item": "ul.news-items.tab-panel li.clearfix",
-        "title": "a",
-        "date": "span.date",
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "zj_pubsvc",
-      "name": "浙江省公共资源交易服务平台",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "https://ggzy.zj.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "item": "ul.list-view li.list-view-cell",
-        "title": "a div.item-name",
-        "date": "div.item-time",
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "sd_ggzy",
-      "name": "山东省公共资源交易网",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "https://ggzyjyzx.shandong.gov.cn/col/col209477/index.html",
-      "page_depth": 1,
-      "parse": {
-        "item": "ul.section2-content li",
-        "title": "a",
-        "date": "span",
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "cq_zbtb",
-      "name": "重庆市招标投标综合网",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "https://www.cqggzy.com/?main=014005",
-      "page_depth": 1,
-      "parse": {
-        "item": "div.menu-content li",
-        "title": "a",
-        "date": "",
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "nat_ggzy",
-      "name": "全国公共资源交易平台",
-      "kind": "国家级",
-      "stage": "公告",
-      "list_url": "https://www.ggzy.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "item": "div.main_list_on ul li",
-        "title": "a",
-        "date": "span",
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "sx_prec",
-      "name": "全国公共资源交易平台（山西省）",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "https://prec.sxzwfw.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "regex",
-        "pattern": "<a[^>]+href=\"(?P<link>[^\"]+)\"[^>]*class=\"data_jyxx[^\"]*\"[^>]*>\\s*<div>\\s*<span>(?P<title>[^<]+)</span>\\s*<span>(?P<date>[^<]+)</span>"
-      },
-      "filter": true
-    },
-    {
-      "key": "yq_ygz",
-      "name": "渝e招阳光智采平台",
-      "kind": "企业",
-      "stage": "公告",
-      "list_url": "https://www.yangguangguoqi.com/",
-      "page_depth": 1,
-      "parse": {
-        "item": "div.inewslist ul",
-        "title": "li.txt a",
-        "date": "li.date",
-        "link": "li.txt a"
-      },
-      "filter": true
-    },
-    {
-      "key": "ah_jsgc",
-      "name": "安徽省公共资源交易监管网",
-      "kind": "政府",
-      "stage": "招标公告",
-      "list_url": "https://ggzy.ah.gov.cn/jsgc/list",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "li.list-item",
-        "title": "a",
-        "date": null,
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "nx_ggzy",
-      "name": "宁夏回族自治区公共资源交易网",
-      "kind": "政府",
-      "stage": "招标公告",
-      "list_url": "https://ggzyjy.fzggw.nx.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "li.electronic-lists-item",
-        "title": "a",
-        "date": null,
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "hub_ggzy",
-      "name": "湖北省公共资源电子交易服务系统",
-      "kind": "政府",
-      "stage": "项目信息",
-      "list_url": "https://www.hbggzyfwpt.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "div.changeCon li",
-        "title": "a",
-        "date": null,
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "hlj_ggzy",
-      "name": "黑龙江公共资源交易网",
-      "kind": "政府",
-      "stage": "交易公告",
-      "list_url": "https://ggzyjyw.hlj.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "li.wb-data-list",
-        "title": "a",
-        "date": null,
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "jl_ggzy",
-      "name": "吉林省公共资源交易中心",
-      "kind": "政府",
-      "stage": "交易公告",
-      "list_url": "https://www.ggzyzx.jl.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "div.tab_2_main ul li",
-        "title": "a",
-        "date": null,
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "jx_ggzy",
-      "name": "江西省公共资源交易平台",
-      "kind": "政府",
-      "stage": "交易公告",
-      "list_url": "http://ggzy.jiangxi.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "api_json",
-        "api_url": "http://ggzy.jiangxi.gov.cn/XZinterface/rest/esinteligentsearch/getFullTextDataNew",
-        "api_list_field": "result.records",
-        "api_page_field": "pn",
-        "api_size_field": "rn",
-        "api_page_size": 50,
-        "api_max_pages": 8,
-        "api_time_field": "time",
-        "api_params": {
-          "esdsid": "1",
-          "token": "",
-          "sdt": "",
-          "edt": "",
-          "wd": "",
-          "inc_wd": "",
-          "exc_wd": "",
-          "fields": "title",
-          "cnum": "",
-          "sort": "{\"webdate\":\"0\"}",
-          "ssort": "title",
-          "cl": 1000,
-          "cutIngore": "title;linkurl",
-          "terminal": "",
-          "condition": [],
-          "time": [],
-          "highlights": "title",
-          "statistics": null,
-          "unionCondition": null,
-          "accuracy": "",
-          "noParticiple": "1",
-          "searchRange": [],
-          "isBusiness": "1"
-        },
-        "title_field": "title",
-        "date_field": "webdate",
-        "link_field": "linkurl",
-        "link_prefix": "http://ggzy.jiangxi.gov.cn",
-        "api_referer": "http://ggzy.jiangxi.gov.cn/"
-      },
-      "filter": true
-    },
-    {
-      "key": "xj_ggzy",
-      "name": "新疆维吾尔自治区公共资源交易网",
-      "kind": "政府",
-      "stage": "交易公告",
-      "list_url": "http://ggzy.xinjiang.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "css",
-        "item": "div.trade-list a.link-item",
-        "title": "span.title",
-        "date": "span.date",
-        "link": "a"
-      },
-      "filter": true
-    },
-    {
-      "key": "sc_ggzy",
-      "name": "四川省公共资源交易信息网",
-      "kind": "政府",
-      "stage": "交易公告",
-      "list_url": "https://ggzyjy.sc.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "api_json",
-        "api_url": "https://ggzyjy.sc.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew",
-        "api_list_field": "result.records",
-        "api_page_field": "pn",
-        "api_size_field": "rn",
-        "api_page_size": 50,
-        "api_max_pages": 8,
-        "api_time_field": "time",
-        "api_params": {
-          "esdsid": "1",
-          "token": "",
-          "sdt": "",
-          "edt": "",
-          "wd": "",
-          "inc_wd": "",
-          "exc_wd": "",
-          "fields": "title",
-          "cnum": "",
-          "sort": "{\"webdate\":\"0\"}",
-          "ssort": "title",
-          "cl": 1000,
-          "cutIngore": "title;linkurl",
-          "terminal": "",
-          "condition": [],
-          "time": [],
-          "highlights": "title",
-          "statistics": null,
-          "unionCondition": null,
-          "accuracy": "",
-          "noParticiple": "1",
-          "searchRange": [],
-          "isBusiness": "1"
-        },
-        "title_field": "title",
-        "date_field": "webdate",
-        "link_field": "linkurl",
-        "link_prefix": "https://ggzyjy.sc.gov.cn",
-        "api_referer": "https://ggzyjy.sc.gov.cn/jyxx/002001/transactionInfo.html"
-      },
-      "filter": true
-    },
-    {
-      "key": "qh_ggzy",
-      "name": "青海省公共资源交易网",
-      "kind": "政府",
-      "stage": "交易公告",
-      "list_url": "http://www.qhggzyjy.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "api_json",
-        "api_url": "http://www.qhggzyjy.gov.cn/inteligentsearch/rest/inteligentSearch/getFullTextData",
-        "api_list_field": "result.records",
-        "api_page_field": "pn",
-        "api_size_field": "rn",
-        "api_page_size": 50,
-        "api_max_pages": 8,
-        "api_time_field": "time",
-        "api_params": {
-          "token": "",
-          "sdt": "",
-          "edt": "",
-          "wd": "",
-          "inc_wd": "",
-          "exc_wd": "",
-          "fields": "title",
-          "cnum": "001;002;003;004;005;006;007;008;009;010",
-          "sort": "{\"webdate\":\"0\"}",
-          "ssort": "title",
-          "cl": 1000,
-          "terminal": "",
-          "condition": [],
-          "time": [],
-          "highlights": "title",
-          "statistics": null,
-          "unionCondition": null,
-          "accuracy": "",
-          "noParticiple": "1",
-          "searchRange": [],
-          "isBusiness": "1"
-        },
-        "title_field": "title",
-        "date_field": "webdate",
-        "link_field": "linkurl",
-        "link_prefix": "http://www.qhggzyjy.gov.cn",
-        "api_referer": "http://www.qhggzyjy.gov.cn/ggzy/jyxx/001001/transinfo_list.html"
-      },
-      "filter": true
-    },
-    {
-      "key": "hen_ggzy",
-      "name": "河南省公共资源交易中心",
-      "kind": "政府",
-      "stage": "交易公告",
-      "list_url": "https://hnsggzyjy.henan.gov.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "api_json",
-        "api_url": "http://hnsggzyjy.henan.gov.cn/EpointWebBuilder/rest/frontAppCustomAction/getPageInfoListNewYzm",
-        "api_form": true,
-        "api_list_field": "custom.infodata",
-        "api_page_field": "pageIndex",
-        "api_size_field": "pageSize",
-        "api_page_size": 50,
-        "api_max_pages": 6,
-        "api_params": {
-          "siteGuid": "7eb5f7f1-9041-43ad-8e13-8fcb82ea831a",
-          "categoryNum": "002",
-          "jytype": "",
-          "xiaqucode": "4100"
-        },
-        "title_field": "title",
-        "date_field": "startdate",
-        "link_field": "infourl",
-        "link_prefix": "https://hnsggzyjy.henan.gov.cn",
-        "api_referer": "https://hnsggzyjy.henan.gov.cn/"
-      },
-      "filter": true
-    },
-    {
-      "key": "sx_ggzy",
-      "name": "陕西省公共资源交易平台",
-      "kind": "政府",
-      "stage": "交易公告",
-      "list_url": "https://www.sxggzyjy.cn/",
-      "page_depth": 1,
-      "parse": {
-        "type": "api_json",
-        "api_url": "https://www.sxggzyjy.cn/inteligentsearch_new/rest/esinteligentsearch/getFullTextDataNew",
-        "api_list_field": "content.result.records",
-        "api_page_field": "pn",
-        "api_size_field": "rn",
-        "api_page_size": 50,
-        "api_max_pages": 8,
-        "api_time_field": "time",
-        "api_params": {
-          "esdsid": "1",
-          "token": "",
-          "sdt": "",
-          "edt": "",
-          "wd": "",
-          "inc_wd": "",
-          "exc_wd": "",
-          "fields": "title",
-          "cnum": "",
-          "sort": "{\"webdate\":\"0\"}",
-          "ssort": "title",
-          "cl": 1000,
-          "cutIngore": "title;linkurl",
-          "terminal": "",
-          "condition": [],
-          "time": [],
-          "highlights": "title",
-          "statistics": null,
-          "unionCondition": null,
-          "accuracy": "",
-          "noParticiple": "1",
-          "searchRange": [],
-          "isBusiness": "1"
-        },
-        "title_field": "title",
-        "date_field": "webdate",
-        "link_field": "linkurl",
-        "link_prefix": "https://www.sxggzyjy.cn",
-        "api_referer": "https://www.sxggzyjy.cn/"
-      },
-      "filter": true
-    }
-  ],
-  "regions": [
-    {
-      "province": "广东",
-      "cities": []
-    },
-    {
-      "province": "江苏",
-      "cities": [
-        "苏州"
-      ]
-    },
-    {
-      "province": "山东",
-      "cities": []
-    },
-    {
-      "province": "浙江",
-      "cities": [
-        "杭州"
-      ]
-    },
-    {
-      "province": "山西",
-      "cities": []
-    },
-    {
-      "province": "福建",
-      "cities": []
-    },
-    {
-      "province": "海南",
-      "cities": []
-    },
-    {
-      "province": "北京",
-      "cities": []
-    },
-    {
-      "province": "上海",
-      "cities": []
-    },
-    {
-      "province": "天津",
-      "cities": []
-    },
-    {
-      "province": "重庆",
-      "cities": []
-    },
-    {
-      "province": "安徽",
-      "cities": [
-        "合肥",
-        "芜湖",
-        "蚌埠",
-        "淮南",
-        "马鞍山",
-        "淮北",
-        "铜陵",
-        "安庆",
-        "黄山",
-        "滁州",
-        "阜阳",
-        "宿州",
-        "六安",
-        "亳州",
-        "池州",
-        "宣城"
-      ]
-    },
-    {
-      "province": "宁夏",
-      "cities": [
-        "银川",
-        "石嘴山",
-        "吴忠",
-        "固原",
-        "中卫"
-      ]
-    },
-    {
-      "province": "湖北",
-      "cities": [
-        "武汉",
-        "黄石",
-        "十堰",
-        "宜昌",
-        "襄阳",
-        "鄂州",
-        "荆门",
-        "孝感",
-        "荆州",
-        "黄冈",
-        "咸宁",
-        "随州",
-        "恩施",
-        "仙桃",
-        "潜江",
-        "天门",
-        "神农架"
-      ]
-    },
-    {
-      "province": "黑龙江",
-      "cities": [
-        "哈尔滨",
-        "齐齐哈尔",
-        "鸡西",
-        "鹤岗",
-        "双鸭山",
-        "大庆",
-        "伊春",
-        "佳木斯",
-        "七台河",
-        "牡丹江",
-        "黑河",
-        "绥化",
-        "大兴安岭"
-      ]
-    },
-    {
-      "province": "吉林",
-      "cities": [
-        "长春",
-        "四平",
-        "辽源",
-        "通化",
-        "白山",
-        "松原",
-        "白城",
-        "延边"
-      ]
-    }
-  ]
+    "title_field": "NAME",
+    "date_field": "TM",
+    "link_template": "https://ggzyfw.fj.gov.cn/business/detail?name={NAME}&cid={M_ID}&type={KIND}",
+    "api_referer": "https://ggzyfw.fj.gov.cn/business/list"
+   },
+   "filter": true
+  }
+ ],
+ "regions": [
+  {
+   "province": "广东",
+   "cities": []
+  },
+  {
+   "province": "江苏",
+   "cities": [
+    "苏州"
+   ]
+  },
+  {
+   "province": "山东",
+   "cities": []
+  },
+  {
+   "province": "浙江",
+   "cities": [
+    "杭州"
+   ]
+  },
+  {
+   "province": "山西",
+   "cities": []
+  },
+  {
+   "province": "福建",
+   "cities": []
+  },
+  {
+   "province": "海南",
+   "cities": []
+  },
+  {
+   "province": "北京",
+   "cities": []
+  },
+  {
+   "province": "上海",
+   "cities": []
+  },
+  {
+   "province": "天津",
+   "cities": []
+  },
+  {
+   "province": "重庆",
+   "cities": []
+  },
+  {
+   "province": "安徽",
+   "cities": [
+    "合肥",
+    "芜湖",
+    "蚌埠",
+    "淮南",
+    "马鞍山",
+    "淮北",
+    "铜陵",
+    "安庆",
+    "黄山",
+    "滁州",
+    "阜阳",
+    "宿州",
+    "六安",
+    "亳州",
+    "池州",
+    "宣城"
+   ]
+  },
+  {
+   "province": "宁夏",
+   "cities": [
+    "银川",
+    "石嘴山",
+    "吴忠",
+    "固原",
+    "中卫"
+   ]
+  },
+  {
+   "province": "湖北",
+   "cities": [
+    "武汉",
+    "黄石",
+    "十堰",
+    "宜昌",
+    "襄阳",
+    "鄂州",
+    "荆门",
+    "孝感",
+    "荆州",
+    "黄冈",
+    "咸宁",
+    "随州",
+    "恩施",
+    "仙桃",
+    "潜江",
+    "天门",
+    "神农架"
+   ]
+  },
+  {
+   "province": "黑龙江",
+   "cities": [
+    "哈尔滨",
+    "齐齐哈尔",
+    "鸡西",
+    "鹤岗",
+    "双鸭山",
+    "大庆",
+    "伊春",
+    "佳木斯",
+    "七台河",
+    "牡丹江",
+    "黑河",
+    "绥化",
+    "大兴安岭"
+   ]
+  },
+  {
+   "province": "吉林",
+   "cities": [
+    "长春",
+    "四平",
+    "辽源",
+    "通化",
+    "白山",
+    "松原",
+    "白城",
+    "延边"
+   ]
+  }
+ ]
 }
