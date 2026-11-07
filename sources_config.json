@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "settings": {
     "date_range_days": 180,
     "stages": []
@@ -353,6 +353,86 @@
         "link": "li.txt a"
       },
       "filter": true
+    },
+    {
+      "key": "ah_jsgc",
+      "name": "安徽省公共资源交易监管网",
+      "kind": "政府",
+      "stage": "招标公告",
+      "list_url": "https://ggzy.ah.gov.cn/jsgc/list",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "li.list-item",
+        "title": "a",
+        "date": null,
+        "link": "a"
+      },
+      "filter": true
+    },
+    {
+      "key": "nx_ggzy",
+      "name": "宁夏回族自治区公共资源交易网",
+      "kind": "政府",
+      "stage": "招标公告",
+      "list_url": "https://ggzyjy.fzggw.nx.gov.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "li.electronic-lists-item",
+        "title": "a",
+        "date": null,
+        "link": "a"
+      },
+      "filter": true
+    },
+    {
+      "key": "hub_ggzy",
+      "name": "湖北省公共资源电子交易服务系统",
+      "kind": "政府",
+      "stage": "项目信息",
+      "list_url": "https://www.hbggzyfwpt.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "div.changeCon li",
+        "title": "a",
+        "date": null,
+        "link": "a"
+      },
+      "filter": true
+    },
+    {
+      "key": "hlj_ggzy",
+      "name": "黑龙江公共资源交易网",
+      "kind": "政府",
+      "stage": "交易公告",
+      "list_url": "https://ggzyjyw.hlj.gov.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "li.wb-data-list",
+        "title": "a",
+        "date": null,
+        "link": "a"
+      },
+      "filter": true
+    },
+    {
+      "key": "jl_ggzy",
+      "name": "吉林省公共资源交易中心",
+      "kind": "政府",
+      "stage": "交易公告",
+      "list_url": "https://www.ggzyzx.jl.gov.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "css",
+        "item": "div.tab_2_main ul li",
+        "title": "a",
+        "date": null,
+        "link": "a"
+      },
+      "filter": true
     }
   ],
   "regions": [
@@ -402,6 +482,26 @@
     },
     {
       "province": "重庆",
+      "cities": []
+    },
+    {
+      "province": "安徽",
+      "cities": []
+    },
+    {
+      "province": "宁夏",
+      "cities": []
+    },
+    {
+      "province": "湖北",
+      "cities": []
+    },
+    {
+      "province": "黑龙江",
+      "cities": []
+    },
+    {
+      "province": "吉林",
       "cities": []
     }
   ]
