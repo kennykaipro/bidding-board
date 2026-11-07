@@ -1,5 +1,5 @@
 {
- "version": 8,
+ "version": 9,
  "settings": {
   "date_range_days": 180,
   "stages": []
@@ -481,7 +481,8 @@
     "link_prefix": "http://ggzy.jiangxi.gov.cn",
     "api_referer": "http://ggzy.jiangxi.gov.cn/"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "江西"
   },
   {
    "key": "xj_ggzy",
@@ -497,7 +498,8 @@
     "date": "span.date",
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "新疆"
   },
   {
    "key": "sc_ggzy",
@@ -546,7 +548,8 @@
     "link_prefix": "https://ggzyjy.sc.gov.cn",
     "api_referer": "https://ggzyjy.sc.gov.cn/jyxx/002001/transactionInfo.html"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "四川"
   },
   {
    "key": "qh_ggzy",
@@ -593,7 +596,8 @@
     "link_prefix": "http://www.qhggzyjy.gov.cn",
     "api_referer": "http://www.qhggzyjy.gov.cn/ggzy/jyxx/001001/transinfo_list.html"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "青海"
   },
   {
    "key": "hen_ggzy",
@@ -623,7 +627,8 @@
     "link_prefix": "https://hnsggzyjy.henan.gov.cn",
     "api_referer": "https://hnsggzyjy.henan.gov.cn/"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "河南"
   },
   {
    "key": "sx_ggzy",
@@ -672,7 +677,8 @@
     "link_prefix": "https://www.sxggzyjy.cn",
     "api_referer": "https://www.sxggzyjy.cn/"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "陕西"
   },
   {
    "key": "fj_ggzy_gcjs",
@@ -711,7 +717,8 @@
     "link_template": "https://ggzyfw.fj.gov.cn/business/detail?name={NAME}&cid={M_ID}&type={KIND}",
     "api_referer": "https://ggzyfw.fj.gov.cn/business/list"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "福建"
   },
   {
    "key": "fj_ggzy_zfcg",
@@ -750,7 +757,8 @@
     "link_template": "https://ggzyfw.fj.gov.cn/business/detail?name={NAME}&cid={M_ID}&type={KIND}",
     "api_referer": "https://ggzyfw.fj.gov.cn/business/list"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "福建"
   },
   {
    "key": "js_ggzy",
@@ -802,7 +810,8 @@
     "link_prefix": "https://jsggzy.jszwfw.gov.cn",
     "api_referer": "https://jsggzy.jszwfw.gov.cn/jyxx/tradeInfonew.html"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "江苏"
   },
   {
    "key": "gz_ggzy_gcjs",
@@ -834,7 +843,8 @@
     "link_field": "apiUrl",
     "api_referer": "https://ggzy.guizhou.gov.cn/xxfw/gcjs/"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "贵州"
   },
   {
    "key": "gz_ggzy_zfcg",
@@ -866,7 +876,8 @@
     "link_field": "apiUrl",
     "api_referer": "https://ggzy.guizhou.gov.cn/xxfw/zfcg/"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "贵州"
   }
  ],
  "regions": [
