@@ -773,10 +773,13 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
         body = dict(params)
         page_val = page * size if page_calc == "multiply" else page
         body.update({page_field: page_val, size_field: size})
+        date_time = bool(src.get("api_date_field_time") or parse.get("api_date_field_time") or False)
         if src.get("api_date_begin_field"):
-            body[src["api_date_begin_field"]] = f"{cutoff[:4]}-{cutoff[4:6]}-{cutoff[6:8]}"
+            b = f"{cutoff[:4]}-{cutoff[4:6]}-{cutoff[6:8]}"
+            body[src["api_date_begin_field"]] = b + (" 00:00:00" if date_time else "")
         if src.get("api_date_end_field"):
-            body[src["api_date_end_field"]] = f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]}"
+            e = f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]}"
+            body[src["api_date_end_field"]] = e + (" 23:59:59" if date_time else "")
         if src.get("api_time_field"):
             tf_start = f"{cutoff} 00:00:00" if not src.get("api_time_field_dash", parse.get("api_time_field_dash", False)) else f"{cutoff[:4]}-{cutoff[4:6]}-{cutoff[6:8]} 00:00:00"
             tf_end = f"{end_date} 23:59:59" if not src.get("api_time_field_dash", parse.get("api_time_field_dash", False)) else f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]} 23:59:59"
@@ -845,6 +848,12 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
             if not title:
                 continue
             date = str(it.get(date_f) or "")[:10]
+            if src.get("api_date_field_ms") or parse.get("api_date_field_ms"):
+                try:
+                    ms = int(it.get(date_f) or 0)
+                    date = (datetime.fromtimestamp(ms / 1000)).strftime("%Y-%m-%d")
+                except Exception:  # noqa: BLE001
+                    date = str(it.get(date_f) or "")[:10]
             href = str(it.get(link_f) or "")
             if link_tpl and not href:
                 try:
