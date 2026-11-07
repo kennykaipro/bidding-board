@@ -762,6 +762,8 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
     page_field = src.get("api_page_field", "") or parse.get("api_page_field", "") or "page"
     size_field = src.get("api_size_field", "") or parse.get("api_size_field", "") or "size"
     page_start = int(src.get("api_page_start", parse.get("api_page_start", 0)) or 0)
+    page_calc = src.get("api_page_calc", "") or parse.get("api_page_calc", "") or ""
+    time_field_name = src.get("api_time_field_name", "") or parse.get("api_time_field_name", "") or "infodate"
     form_mode = bool(src.get("api_form") or parse.get("api_form") or False)
     referer = src.get("api_referer", "") or parse.get("api_referer", "") or ""
     sign_key = src.get("api_sign_key", "") or parse.get("api_sign_key", "") or ""
@@ -769,15 +771,18 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
     items = []
     for page in range(page_start, page_start + int(src.get("api_max_pages", parse.get("api_max_pages", 5)) or 5)):
         body = dict(params)
-        body.update({page_field: page, size_field: size})
+        page_val = page * size if page_calc == "multiply" else page
+        body.update({page_field: page_val, size_field: size})
         if src.get("api_date_begin_field"):
             body[src["api_date_begin_field"]] = f"{cutoff[:4]}-{cutoff[4:6]}-{cutoff[6:8]}"
         if src.get("api_date_end_field"):
             body[src["api_date_end_field"]] = f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]}"
         if src.get("api_time_field"):
-            body[src["api_time_field"]] = [{"fieldName": "infodate",
-                                            "startTime": f"{cutoff} 00:00:00",
-                                            "endTime": f"{end_date} 23:59:59"}]
+            tf_start = f"{cutoff} 00:00:00" if not src.get("api_time_field_dash", parse.get("api_time_field_dash", False)) else f"{cutoff[:4]}-{cutoff[4:6]}-{cutoff[6:8]} 00:00:00"
+            tf_end = f"{end_date} 23:59:59" if not src.get("api_time_field_dash", parse.get("api_time_field_dash", False)) else f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]} 23:59:59"
+            body[src["api_time_field"]] = [{"fieldName": time_field_name,
+                                            "startTime": tf_start,
+                                            "endTime": tf_end}]
         try:
             data = fetch_api_json(api_url, body, form=form_mode, referer=referer, sign_key=sign_key)
         except Exception as exc:  # noqa: BLE001
