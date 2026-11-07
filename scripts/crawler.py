@@ -820,6 +820,8 @@ def _parse_css(html, parse, link_prefix, default_stage, cutoff, list_url=""):
         if date and date.replace("-", "") < cutoff:
             continue
         a = node.select_one(l_sel) if l_sel else t
+        if a is None and l_sel and getattr(node, "name", "") == l_sel:
+            a = node
         href = (a.get("href") or "") if a else ""
         href = abs_url(list_url, href, link_prefix)
         out.append({"title": title, "url": href, "date": date or "", "stage": default_stage})
