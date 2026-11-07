@@ -286,9 +286,14 @@
       "name": "山东省公共资源交易网",
       "kind": "政府",
       "stage": "公告",
-      "list_url": "http://ggzyjy.shandong.gov.cn/",
+      "list_url": "https://ggzyjyzx.shandong.gov.cn/col/col209477/index.html",
       "page_depth": 1,
-      "parse": {},
+      "parse": {
+        "item": "ul.section2-content li",
+        "title": "a",
+        "date": "span",
+        "link": "a"
+      },
       "filter": true
     },
     {
@@ -318,6 +323,34 @@
         "title": "a",
         "date": "span",
         "link": "a"
+      },
+      "filter": true
+    },
+    {
+      "key": "sx_prec",
+      "name": "全国公共资源交易平台（山西省）",
+      "kind": "政府",
+      "stage": "公告",
+      "list_url": "https://prec.sxzwfw.gov.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "regex",
+        "pattern": "<a[^>]+href=\"(?P<link>[^\"]+)\"[^>]*class=\"data_jyxx[^\"]*\"[^>]*>\\s*<div>\\s*<span>(?P<title>[^<]+)</span>\\s*<span>(?P<date>[^<]+)</span>"
+      },
+      "filter": true
+    },
+    {
+      "key": "yq_ygz",
+      "name": "渝e招阳光智采平台",
+      "kind": "企业",
+      "stage": "公告",
+      "list_url": "https://www.yangguangguoqi.com/",
+      "page_depth": 1,
+      "parse": {
+        "item": "div.inewslist ul",
+        "title": "li.txt a",
+        "date": "li.date",
+        "link": "li.txt a"
       },
       "filter": true
     }
