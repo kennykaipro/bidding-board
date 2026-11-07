@@ -433,6 +433,85 @@
         "link": "a"
       },
       "filter": true
+    },
+    {
+      "key": "hen_ggzy",
+      "name": "河南省公共资源交易中心",
+      "kind": "政府",
+      "stage": "交易公告",
+      "list_url": "https://hnsggzyjy.henan.gov.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "api_json",
+        "api_url": "http://hnsggzyjy.henan.gov.cn/EpointWebBuilder/rest/frontAppCustomAction/getPageInfoListNewYzm",
+        "api_form": true,
+        "api_list_field": "custom.infodata",
+        "api_page_field": "pageIndex",
+        "api_size_field": "pageSize",
+        "api_page_size": 50,
+        "api_max_pages": 6,
+        "api_params": {
+          "siteGuid": "7eb5f7f1-9041-43ad-8e13-8fcb82ea831a",
+          "categoryNum": "002",
+          "jytype": "",
+          "xiaqucode": "4100"
+        },
+        "title_field": "title",
+        "date_field": "startdate",
+        "link_field": "infourl",
+        "link_prefix": "https://hnsggzyjy.henan.gov.cn",
+        "api_referer": "https://hnsggzyjy.henan.gov.cn/"
+      },
+      "filter": true
+    },
+    {
+      "key": "sx_ggzy",
+      "name": "陕西省公共资源交易平台",
+      "kind": "政府",
+      "stage": "交易公告",
+      "list_url": "https://www.sxggzyjy.cn/",
+      "page_depth": 1,
+      "parse": {
+        "type": "api_json",
+        "api_url": "https://www.sxggzyjy.cn/inteligentsearch_new/rest/esinteligentsearch/getFullTextDataNew",
+        "api_list_field": "content.result.records",
+        "api_page_field": "pn",
+        "api_size_field": "rn",
+        "api_page_size": 50,
+        "api_max_pages": 8,
+        "api_time_field": "time",
+        "api_params": {
+          "esdsid": "1",
+          "token": "",
+          "sdt": "",
+          "edt": "",
+          "wd": "",
+          "inc_wd": "",
+          "exc_wd": "",
+          "fields": "title",
+          "cnum": "",
+          "sort": "{\"webdate\":\"0\"}",
+          "ssort": "title",
+          "cl": 1000,
+          "cutIngore": "title;linkurl",
+          "terminal": "",
+          "condition": [],
+          "time": [],
+          "highlights": "title",
+          "statistics": null,
+          "unionCondition": null,
+          "accuracy": "",
+          "noParticiple": "1",
+          "searchRange": [],
+          "isBusiness": "1"
+        },
+        "title_field": "title",
+        "date_field": "webdate",
+        "link_field": "linkurl",
+        "link_prefix": "https://www.sxggzyjy.cn",
+        "api_referer": "https://www.sxggzyjy.cn/"
+      },
+      "filter": true
     }
   ],
   "regions": [
