@@ -466,15 +466,23 @@ def parse_source(src, cutoff: str, days: int = 7):
     return items
 
 
-def fetch_api_json(url: str, body: dict, retries: int = 3):
-    """POST JSON 接口抓取（深圳公共资源交易中心模式）。"""
+def fetch_api_json(url: str, body: dict, retries: int = 3, form: bool = False, referer: str = ""):
+    """POST JSON 接口抓取（深圳公共资源交易中心模式）。
+    form=True 时以 application/x-www-form-urlencoded 提交（webBuilder 系列接口）。"""
     headers = dict(BROWSER_HEADERS)
-    headers.update({"Content-Type": "application/json",
-                    "Referer": "https://www.szggzy.com/xxgk/list.html"})
+    if form:
+        headers.update({"Content-Type": "application/x-www-form-urlencoded"})
+        if referer:
+            headers["Referer"] = referer
+        payload = body
+    else:
+        headers.update({"Content-Type": "application/json",
+                        "Referer": referer or "https://www.szggzy.com/xxgk/list.html"})
+        payload = json.dumps(body)
     last = None
     for attempt in range(1, retries + 1):
         try:
-            resp = requests.post(url, headers=headers, data=json.dumps(body), timeout=12, verify=False)
+            resp = requests.post(url, headers=headers, data=payload, timeout=12, verify=False)
             resp.raise_for_status()
             return resp.json()
         except Exception as exc:  # noqa: BLE001
@@ -693,7 +701,13 @@ def parse_custom_source(src, cutoff: str, root: str = "", auto_detect: bool = Tr
 
 def _parse_api_json_custom(src, cutoff: str, end_date: str):
     """通用 JSON-API 源：POST JSON 请求，配置 api_params / api_page_size / 字段映射。
-    兼容两种配置位置：顶层（旧）或 src.parse 内（admin 自助表单写入的 v2 结构）。"""
+    兼容两种配置位置：顶层（旧）或 src.parse 内（admin 自助表单写入的 v2 结构）。
+    扩展能力（webBuilder/esinteligentsearch 系列）：
+      - api_form=True：以 form-urlencoded 提交（河南 getPageInfoListNewYzm）
+      - api_list_field：点分路径定位列表字段（如 custom.infodata / result.records），
+        中途遇到 JSON 字符串自动解析（陕西 esinteligentsearch content 为内层字符串）
+      - api_page_field / api_size_field：自定义分页参数名（默认 page/size）
+      - api_referer：自定义 Referer 头"""
     parse = src.get("parse") or {}
     api_url = src.get("api_url") or parse.get("api_url") or src.get("list_url")
     params = dict(src.get("api_params", {}) or parse.get("api_params", {}) or {})
@@ -704,24 +718,58 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
     prefix = src.get("link_prefix", "") or parse.get("link_prefix", "") or ""
     link_tpl = src.get("link_template", "") or parse.get("link_template", "") or ""
     stage = src.get("stage", "公告")
+    list_field = src.get("api_list_field", "") or parse.get("api_list_field", "") or ""
+    page_field = src.get("api_page_field", "") or parse.get("api_page_field", "") or "page"
+    size_field = src.get("api_size_field", "") or parse.get("api_size_field", "") or "size"
+    form_mode = bool(src.get("api_form") or parse.get("api_form") or False)
+    referer = src.get("api_referer", "") or parse.get("api_referer", "") or ""
     items = []
     for page in range(int(src.get("api_max_pages", parse.get("api_max_pages", 5)) or 5)):
         body = dict(params)
-        body.update({"page": page, "size": size})
+        body.update({page_field: page, size_field: size})
         if src.get("api_date_begin_field"):
             body[src["api_date_begin_field"]] = cutoff
         if src.get("api_date_end_field"):
             body[src["api_date_end_field"]] = end_date
+        if src.get("api_time_field"):
+            body[src["api_time_field"]] = [{"fieldName": "infodate",
+                                            "startTime": f"{cutoff} 00:00:00",
+                                            "endTime": f"{end_date} 23:59:59"}]
         try:
-            data = fetch_api_json(api_url, body)
+            data = fetch_api_json(api_url, body, form=form_mode, referer=referer)
         except Exception as exc:  # noqa: BLE001
             items.append({"error": f"{api_url}: {exc}"})
             break
-        # 自动定位列表字段
+        # 定位列表字段
         content = data
-        for key in ("content", "list", "rows", "items", "data", "records"):
-            if isinstance(content, dict) and key in content:
-                content = content[key]
+        if list_field:
+            for part in list_field.split("."):
+                if isinstance(content, str):
+                    try:
+                        content = json.loads(content)
+                    except Exception:  # noqa: BLE001
+                        content = None
+                        break
+                if isinstance(content, dict) and part in content:
+                    content = content[part]
+                else:
+                    content = None
+                    break
+            if not isinstance(content, list):
+                content = data
+                for key in ("content", "list", "rows", "items", "data", "records"):
+                    if isinstance(content, dict) and key in content:
+                        content = content[key]
+                        if isinstance(content, str):
+                            try:
+                                content = json.loads(content)
+                            except Exception:  # noqa: BLE001
+                                content = None
+                                break
+        else:
+            for key in ("content", "list", "rows", "items", "data", "records"):
+                if isinstance(content, dict) and key in content:
+                    content = content[key]
         if isinstance(content, dict) and isinstance(content.get("content"), list):
             content = content["content"]
         if isinstance(content, dict) and isinstance(content.get("list"), list):
