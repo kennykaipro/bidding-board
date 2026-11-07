@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "settings": {
     "date_range_days": 180,
     "stages": []
@@ -248,12 +248,6 @@
       "cities": []
     },
     {
-      "province": "浙江",
-      "cities": [
-        "杭州"
-      ]
-    },
-    {
       "province": "江苏",
       "cities": [
         "苏州"
@@ -261,6 +255,24 @@
     },
     {
       "province": "山东",
+      "cities": []
+    },
+    {
+      "province": "浙江",
+      "cities": [
+        "杭州"
+      ]
+    },
+    {
+      "province": "山西",
+      "cities": []
+    },
+    {
+      "province": "福建",
+      "cities": []
+    },
+    {
+      "province": "海南",
       "cities": []
     }
   ]
