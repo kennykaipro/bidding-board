@@ -246,7 +246,7 @@
       "name": "北京市公共资源交易服务平台",
       "kind": "政府",
       "stage": "公告",
-      "list_url": "http://www.bjggzyfw.gov.cn/",
+      "list_url": "https://ggzyfw.beijing.gov.cn/",
       "page_depth": 1,
       "parse": {},
       "filter": true
@@ -258,27 +258,12 @@
       "stage": "公告",
       "list_url": "https://ggzy.zwfwb.tj.gov.cn/",
       "page_depth": 1,
-      "parse": {},
-      "filter": true
-    },
-    {
-      "key": "sh_zjw",
-      "name": "上海市住房和城乡建设管理委员会",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "https://zjw.sh.gov.cn/shsjsgczbgg/index.html",
-      "page_depth": 1,
-      "parse": {},
-      "filter": true
-    },
-    {
-      "key": "js_zbtb",
-      "name": "江苏省招标投标公共服务平台",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "http://www.jszbtb.com/",
-      "page_depth": 1,
-      "parse": {},
+      "parse": {
+        "item": "ul.news-items.tab-panel li.clearfix",
+        "title": "a",
+        "date": "span.date",
+        "link": "a"
+      },
       "filter": true
     },
     {
@@ -286,19 +271,14 @@
       "name": "浙江省公共资源交易服务平台",
       "kind": "政府",
       "stage": "公告",
-      "list_url": "http://www.zjpubservice.com/",
+      "list_url": "https://ggzy.zj.gov.cn/",
       "page_depth": 1,
-      "parse": {},
-      "filter": true
-    },
-    {
-      "key": "fj_ggzyfw",
-      "name": "福建省公共资源交易电子公共服务平台",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "https://ggzyfw.fj.gov.cn/",
-      "page_depth": 1,
-      "parse": {},
+      "parse": {
+        "item": "ul.list-view li.list-view-cell",
+        "title": "a div.item-name",
+        "date": "div.item-time",
+        "link": "a"
+      },
       "filter": true
     },
     {
@@ -312,33 +292,18 @@
       "filter": true
     },
     {
-      "key": "gd_zbtb",
-      "name": "广东省招标投标监管网",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "http://www.gdzbtb.gov.cn/",
-      "page_depth": 1,
-      "parse": {},
-      "filter": true
-    },
-    {
-      "key": "gx_ggzy",
-      "name": "广西壮族自治区公共资源交易中心",
-      "kind": "政府",
-      "stage": "公告",
-      "list_url": "http://gxggzy.gxzf.gov.cn/",
-      "page_depth": 1,
-      "parse": {},
-      "filter": true
-    },
-    {
       "key": "cq_zbtb",
       "name": "重庆市招标投标综合网",
       "kind": "政府",
       "stage": "公告",
-      "list_url": "http://www.cqzb.gov.cn/",
+      "list_url": "https://www.cqggzy.com/?main=014005",
       "page_depth": 1,
-      "parse": {},
+      "parse": {
+        "item": "div.menu-content li",
+        "title": "a",
+        "date": "",
+        "link": "a"
+      },
       "filter": true
     },
     {
@@ -347,16 +312,6 @@
       "kind": "国家级",
       "stage": "公告",
       "list_url": "https://www.ggzy.gov.cn/",
-      "page_depth": 1,
-      "parse": {},
-      "filter": true
-    },
-    {
-      "key": "nat_zycg",
-      "name": "中央政府采购网（国管局，中央单位）",
-      "kind": "国家级",
-      "stage": "公告",
-      "list_url": "http://www.zycg.gov.cn/",
       "page_depth": 1,
       "parse": {},
       "filter": true
