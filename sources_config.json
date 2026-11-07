@@ -1,5 +1,5 @@
 {
- "version": 7,
+ "version": 8,
  "settings": {
   "date_range_days": 180,
   "stages": []
@@ -801,6 +801,70 @@
     "link_field": "linkurl",
     "link_prefix": "https://jsggzy.jszwfw.gov.cn",
     "api_referer": "https://jsggzy.jszwfw.gov.cn/jyxx/tradeInfonew.html"
+   },
+   "filter": true
+  },
+  {
+   "key": "gz_ggzy_gcjs",
+   "name": "贵州省公共资源交易平台·工程建设",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://ggzy.guizhou.gov.cn/xxfw/gcjs/",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "https://ggzy.guizhou.gov.cn/tradeInfo/es/list",
+    "api_list_field": "list",
+    "api_page_field": "pageNum",
+    "api_size_field": "pageSize",
+    "api_page_size": 50,
+    "api_page_start": 1,
+    "api_max_pages": 8,
+    "api_date_begin_field": "startTime",
+    "api_date_end_field": "endTime",
+    "api_date_field_time": true,
+    "api_params": {
+     "channelId": "5904475",
+     "announcement": "",
+     "docSourceName": ""
+    },
+    "title_field": "docTitle",
+    "date_field": "docRelTime",
+    "api_date_field_ms": true,
+    "link_field": "apiUrl",
+    "api_referer": "https://ggzy.guizhou.gov.cn/xxfw/gcjs/"
+   },
+   "filter": true
+  },
+  {
+   "key": "gz_ggzy_zfcg",
+   "name": "贵州省公共资源交易平台·政府采购",
+   "kind": "政府",
+   "stage": "采购公告",
+   "list_url": "https://ggzy.guizhou.gov.cn/xxfw/zfcg/",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "https://ggzy.guizhou.gov.cn/tradeInfo/es/list",
+    "api_list_field": "list",
+    "api_page_field": "pageNum",
+    "api_size_field": "pageSize",
+    "api_page_size": 50,
+    "api_page_start": 1,
+    "api_max_pages": 8,
+    "api_date_begin_field": "startTime",
+    "api_date_end_field": "endTime",
+    "api_date_field_time": true,
+    "api_params": {
+     "channelId": "5904543",
+     "announcement": "",
+     "docSourceName": ""
+    },
+    "title_field": "docTitle",
+    "date_field": "docRelTime",
+    "api_date_field_ms": true,
+    "link_field": "apiUrl",
+    "api_referer": "https://ggzy.guizhou.gov.cn/xxfw/zfcg/"
    },
    "filter": true
   }
