@@ -1,5 +1,5 @@
 {
- "version": 9,
+ "version": 10,
  "settings": {
   "date_range_days": 180,
   "stages": []
@@ -115,7 +115,8 @@
     "date": "span.news-time",
     "link": "a"
    },
-   "filter": false
+   "filter": false,
+   "source_province": "广东"
   },
   {
    "key": "ciesco",
@@ -249,7 +250,8 @@
    "list_url": "https://ggzyfw.beijing.gov.cn/",
    "page_depth": 1,
    "parse": {},
-   "filter": true
+   "filter": false,
+   "source_province": "北京"
   },
   {
    "key": "tj_ggzy",
@@ -264,7 +266,8 @@
     "date": "span.date",
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "天津"
   },
   {
    "key": "zj_pubsvc",
@@ -279,7 +282,8 @@
     "date": "div.item-time",
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "浙江"
   },
   {
    "key": "sd_ggzy",
@@ -294,7 +298,8 @@
     "date": "span",
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "山东"
   },
   {
    "key": "cq_zbtb",
@@ -309,7 +314,8 @@
     "date": "",
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "重庆"
   },
   {
    "key": "nat_ggzy",
@@ -324,7 +330,8 @@
     "date": "span",
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "全国"
   },
   {
    "key": "sx_prec",
@@ -337,7 +344,8 @@
     "type": "regex",
     "pattern": "<a[^>]+href=\"(?P<link>[^\"]+)\"[^>]*class=\"data_jyxx[^\"]*\"[^>]*>\\s*<div>\\s*<span>(?P<title>[^<]+)</span>\\s*<span>(?P<date>[^<]+)</span>"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "山西"
   },
   {
    "key": "yq_ygz",
@@ -352,7 +360,8 @@
     "date": "li.date",
     "link": "li.txt a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "重庆"
   },
   {
    "key": "ah_jsgc",
@@ -368,7 +377,8 @@
     "date": null,
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "安徽"
   },
   {
    "key": "nx_ggzy",
@@ -384,7 +394,8 @@
     "date": null,
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "宁夏"
   },
   {
    "key": "hub_ggzy",
@@ -400,7 +411,8 @@
     "date": null,
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "湖北"
   },
   {
    "key": "hlj_ggzy",
@@ -416,7 +428,8 @@
     "date": null,
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "黑龙江"
   },
   {
    "key": "jl_ggzy",
@@ -432,7 +445,8 @@
     "date": null,
     "link": "a"
    },
-   "filter": true
+   "filter": false,
+   "source_province": "吉林"
   },
   {
    "key": "jx_ggzy",
