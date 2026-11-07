@@ -1,5 +1,5 @@
 {
- "version": 6,
+ "version": 7,
  "settings": {
   "date_range_days": 180,
   "stages": []
@@ -749,6 +749,58 @@
     "date_field": "TM",
     "link_template": "https://ggzyfw.fj.gov.cn/business/detail?name={NAME}&cid={M_ID}&type={KIND}",
     "api_referer": "https://ggzyfw.fj.gov.cn/business/list"
+   },
+   "filter": true
+  },
+  {
+   "key": "js_ggzy",
+   "name": "江苏省公共资源交易网",
+   "kind": "政府",
+   "stage": "交易公告",
+   "list_url": "https://jsggzy.jszwfw.gov.cn/jyxx/tradeInfonew.html",
+   "page_depth": 1,
+   "parse": {
+    "type": "api_json",
+    "api_url": "https://jsggzy.jszwfw.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew",
+    "api_list_field": "result.records",
+    "api_page_field": "pn",
+    "api_size_field": "rn",
+    "api_page_size": 50,
+    "api_page_calc": "multiply",
+    "api_max_pages": 8,
+    "api_time_field": "time",
+    "api_time_field_name": "infodatepx",
+    "api_time_field_dash": true,
+    "api_params": {
+     "token": "",
+     "sdt": "",
+     "edt": "",
+     "wd": "",
+     "inc_wd": "",
+     "exc_wd": "",
+     "fields": "title;categorynum;zhuanzai;webdate",
+     "cnum": "001",
+     "sort": "{\"infodatepx\":\"0\"}",
+     "ssort": "title",
+     "cl": 200,
+     "terminal": "",
+     "condition": null,
+     "time": [],
+     "highlights": "title",
+     "statistics": null,
+     "unionCondition": null,
+     "opCondition": null,
+     "opType": 0,
+     "accuracy": "",
+     "noParticiple": "1",
+     "searchRange": null,
+     "isBusiness": "1"
+    },
+    "title_field": "title",
+    "date_field": "infodatepx",
+    "link_field": "linkurl",
+    "link_prefix": "https://jsggzy.jszwfw.gov.cn",
+    "api_referer": "https://jsggzy.jszwfw.gov.cn/jyxx/tradeInfonew.html"
    },
    "filter": true
   }
