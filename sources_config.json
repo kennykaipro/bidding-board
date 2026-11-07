@@ -313,7 +313,12 @@
       "stage": "公告",
       "list_url": "https://www.ggzy.gov.cn/",
       "page_depth": 1,
-      "parse": {},
+      "parse": {
+        "item": "div.main_list_on ul li",
+        "title": "a",
+        "date": "span",
+        "link": "a"
+      },
       "filter": true
     }
   ],
