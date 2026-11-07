@@ -274,6 +274,22 @@
     {
       "province": "海南",
       "cities": []
+    },
+    {
+      "province": "北京",
+      "cities": []
+    },
+    {
+      "province": "上海",
+      "cities": []
+    },
+    {
+      "province": "天津",
+      "cities": []
+    },
+    {
+      "province": "重庆",
+      "cities": []
     }
   ]
 }
