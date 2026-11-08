@@ -16,6 +16,7 @@
 """
 import argparse
 import base64
+import concurrent.futures
 import hashlib
 import json
 import os
@@ -23,6 +24,7 @@ import random
 import re
 import socket
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -31,6 +33,39 @@ from datetime import datetime, timedelta
 from urllib.parse import urljoin, urlparse
 
 import requests
+
+# ============ 全局限速与并发保护 ============
+# 单域名限速：同一站点两次请求之间强制随机延时（默认 1200-2200ms），模拟人类浏览，防 WAF 封禁
+_DOMAIN_LAST = {}        # domain -> 上次请求完成时间
+_RLOCK = threading.Lock()
+_LOG_LOCK = threading.Lock()
+_SELECTOR_LOCK = threading.Lock()   # 探测回填写本地配置锁
+
+
+def _log(*args):
+    """线程安全日志打印。"""
+    with _LOG_LOCK:
+        print(*args, flush=True)
+
+
+def domain_delay(url: str, min_gap: float = 1.2, max_gap: float = 2.2):
+    """请求前调用：保证同一域名两次请求间隔 >= 随机 [min_gap, max_gap] 秒。"""
+    if not url:
+        return
+    try:
+        host = urlparse(url).netloc or ""
+    except Exception:  # noqa: BLE001
+        return
+    if not host:
+        return
+    with _RLOCK:
+        now = time.time()
+        last = _DOMAIN_LAST.get(host, 0.0)
+        gap = random.uniform(min_gap, max_gap)
+        wait = gap - (now - last)
+        _DOMAIN_LAST[host] = now + max(0.0, wait)
+    if wait > 0:
+        time.sleep(wait)
 
 # 全局 socket 超时：防止 DNS/TCP/TLS 建立阶段挂起（南网等站点会拖住连接直到默认超时）
 socket.setdefaulttimeout(8)
@@ -192,9 +227,62 @@ def pull_custom_config(root: str):
         print(f"[config] 拉取失败: {e}")
 
 
+def normalize_legacy(data):
+    """旧版 sites-config.json 兼容映射：biddingSites / mediaSites / mediaKeywordList → v2 结构。
+    与 admin.html 的 normalizeLegacy 保持一致；仅当旧格式存在且无 sources 时执行。"""
+    if not isinstance(data, dict):
+        return data
+    if (data.get("biddingSites") or data.get("mediaSites") or data.get("mediaKeywordList")) and not data.get("sources"):
+        out = {"version": 2, "settings": dict(data.get("settings") or {}),
+               "keywords": [], "sources": [], "regions": []}
+        if isinstance(data.get("dateRangeDays"), (int, float)):
+            out["settings"]["date_range_days"] = int(data["dateRangeDays"])
+        sites = list(data.get("biddingSites") or []) + list(data.get("mediaSites") or [])
+        for i, s in enumerate(sites or []):
+            if not isinstance(s, dict):
+                continue
+            ptype = s.get("parseType") or "css"
+            parse = {"type": ptype}
+            if ptype == "css":
+                parse["item"] = s.get("item") or s.get("itemSelector") or ""
+                parse["title"] = s.get("title") or s.get("titleSelector") or "a"
+                parse["date"] = s.get("date") or s.get("dateSelector") or ""
+                parse["link"] = s.get("link") or s.get("linkSelector") or "a"
+                parse["link_prefix"] = s.get("linkPrefix") or s.get("link_prefix") or ""
+            elif ptype == "regex":
+                parse["pattern"] = s.get("pattern") or ""
+            elif ptype == "api_json":
+                parse["api_url"] = s.get("apiUrl") or s.get("listUrl") or s.get("list_url") or ""
+                parse["title_field"] = s.get("titleField") or "title"
+                parse["date_field"] = s.get("dateField") or "releaseTime"
+                parse["link_field"] = s.get("linkField") or ""
+                parse["link_prefix"] = s.get("linkPrefix") or s.get("link_prefix") or ""
+            out["sources"].append({
+                "key": s.get("key") or f"src_{i + 1}_{int(time.time() * 1000):x}",
+                "name": s.get("name") or s.get("siteName") or f"网站{i + 1}",
+                "kind": s.get("kind") or "自定义",
+                "list_url": s.get("listUrl") or s.get("list_url") or s.get("url") or "",
+                "page_depth": s.get("pageDepth") or 1,
+                "stage": s.get("stage") or "公告",
+                "filter": s.get("filter", True),
+                "parse": parse,
+            })
+        kw = data.get("mediaKeywordList") or data.get("keywordList") or data.get("keywords") or []
+        for i, g in enumerate(kw or []):
+            if isinstance(g, str):
+                out["keywords"].append({"group": f"组{i + 1}", "words": [g]})
+            elif isinstance(g, dict) and g.get("group"):
+                out["keywords"].append({"group": g["group"], "words": g.get("words") or []})
+            elif isinstance(g, dict):
+                out["keywords"].append({"group": f"组{i + 1}", "words": g.get("words") or [g]})
+        return out
+    return data
+
+
 def load_board_config(root: str):
     """读取全局配置：settings（日期范围/阶段多选/AI 探测开关）+ keywords + custom sources。
-    本地 sources_config.local.json 可携带 cookies 与自动探测回填的选择器（detected_selectors）。"""
+    本地 sources_config.local.json 可携带 cookies 与自动探测回填的选择器（detected_selectors）。
+    兼容旧版 sites-config.json（biddingSites / mediaSites / mediaKeywordList）。"""
     settings = dict(DEFAULT_SETTINGS)
     keywords = [dict(k) for k in DEFAULT_KEYWORDS]
     custom_sources = []
@@ -202,6 +290,7 @@ def load_board_config(root: str):
     if os.path.exists(public_path):
         try:
             data = json.load(open(public_path, encoding="utf-8"))
+            data = normalize_legacy(data)
             if isinstance(data, dict):
                 if isinstance(data.get("settings"), dict):
                     settings.update({k: v for k, v in data["settings"].items() if v is not None})
@@ -246,9 +335,11 @@ def load_board_config(root: str):
     return settings, keywords, custom_sources
 
 
-def fetch_with_requests(url: str, cookies: str = None, retries: int = 1) -> str:
-    """基于 requests 的抓取，支持 Cookie 头（登录源）与完整浏览器头；带快速重试。
+def fetch_with_requests(url: str, cookies: str = None, retries: int = 3) -> str:
+    """基于 requests 的抓取，支持 Cookie 头（登录源）与完整浏览器头。
+    单域名限速（1200-2200ms）+ 指数退避重试（403/429/5xx/超时等）。
     禁用连接级重试（max_retries=0），避免南网等站点在 TCP/TLS 阶段无限重连拖时间。"""
+    domain_delay(url)
     headers = dict(BROWSER_HEADERS)
     if "bidding.csg.cn" in url:
         headers["Referer"] = "https://www.bidding.csg.cn/"
@@ -269,7 +360,7 @@ def fetch_with_requests(url: str, cookies: str = None, retries: int = 1) -> str:
         except Exception as exc:  # noqa: BLE001
             last = exc
             if attempt < retries:
-                time.sleep(1.0 + random.random())
+                time.sleep(min(8, 2 ** attempt) + random.uniform(0, 0.5))
     raise last
 
 
@@ -284,7 +375,8 @@ BROWSER_HEADERS = {
 
 
 def fetch(url: str, retries: int = 3) -> str:
-    """带完整浏览器头与重试的抓取；南网等站点对 urllib 特征会随机拦截。"""
+    """带完整浏览器头与指数退避重试的抓取；南网等站点对 urllib 特征会随机拦截。"""
+    domain_delay(url)
     last = None
     for attempt in range(1, retries + 1):
         headers = dict(BROWSER_HEADERS)
@@ -298,7 +390,7 @@ def fetch(url: str, retries: int = 3) -> str:
         except Exception as exc:  # noqa: BLE001
             last = exc
             if attempt < retries:
-                time.sleep(2.0 * attempt + random.random())
+                time.sleep(min(8, 2 ** attempt) + random.uniform(0, 0.5))
     raise last
 
 
@@ -330,7 +422,8 @@ def abs_url(list_url: str, href: str, link_prefix: str = "") -> str:
         base = link_prefix.rstrip("/")
         if not base:
             return href
-        return base + (href if href.startswith("/") else "/" + href.lstrip("/"))
+        h = href[2:] if href.startswith("./") else href
+        return base + (h if h.startswith("/") else "/" + h.lstrip("/"))
     try:
         return urljoin(list_url or "", href)
     except Exception:  # noqa: BLE001
@@ -414,24 +507,52 @@ def dynamic_depth(days: int):
     return 120
 
 
+def _is_404(exc) -> bool:
+    """判断异常是否为 404（翻页到底，栏目正常结束；不算站点故障）。"""
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code == 404
+    status = getattr(getattr(exc, "response", None), "status_code", None)
+    if status is not None:
+        return status == 404
+    return "404" in str(exc)
+
+
 def parse_source(src, cutoff: str, days: int = 7):
-    """抓取内置 HTML 源（ccgp/csg），返回条目列表。"""
+    """抓取内置 HTML 源（ccgp/csg），返回条目列表。
+    - 翻页 + 时间熔断：本页无新增（公告全部早于收集时间范围）即停；
+    - 单站点 800 条上限；连续 3 次请求失败跳过站点；
+    - 日志打印：站点名 / 第X页 / 本页条数 / 停止原因。"""
     base = src["base"].rstrip("/") + "/"
     use_requests = src.get("use_requests", False)
     fetch_retries = src.get("retries", 3)
-    page_depth = src.get("page_depth", 1)
+    page_depth = int(src.get("page_depth", 1) or 1)
     if src["key"] == "ccgp":
         page_depth = dynamic_depth(days)
+    name = src.get("name", src["key"])
     items = []
+    consec_fail = 0
     for code, stage in src["columns"]:
         col_url = base + code + "/"
+        reached_max = True
         for page in range(1, page_depth + 1):
+            if len(items) >= 800:
+                _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限800条，停止采集\033[0m")
+                return items
             url = col_url if page == 1 else f"{col_url}index_{page}.htm"
             try:
                 html = fetch_with_requests(url, retries=fetch_retries) if use_requests else fetch(url, retries=fetch_retries)
             except Exception as exc:  # noqa: BLE001
-                items.append({"error": f"{url}: {exc}"})
+                if _is_404(exc):
+                    _log(f"[采集] 站点「{name}」：第{page}页不存在(404)，该栏目翻页结束")
+                    reached_max = False
+                    break
+                consec_fail += 1
+                _log(f"\033[31m[采集] 站点「{name}」：第{page}页请求失败（连续 {consec_fail}/3）：{exc}\033[0m")
+                if consec_fail >= 3:
+                    _log(f"\033[31m[采集] 站点「{name}」：连续3次请求失败，跳过该站点\033[0m")
+                    return items
                 continue
+            consec_fail = 0
             page_start = len(items)
             if src["key"] == "ccgp":
                 for m in RE_CCGP.finditer(html):
@@ -459,9 +580,15 @@ def parse_source(src, cutoff: str, days: int = 7):
                         "stage": stage,
                         "buyer": buyer.strip(),
                     })
-            # 本页未新增任何条目（全部早于 cutoff）→ 无需再翻页
-            if len(items) == page_start:
+            new_count = len(items) - page_start
+            _log(f"[采集] 站点「{name}」：第{page}页 | 本页解析 {new_count} 条")
+            # 时间熔断：本页无新增（全部早于 cutoff）→ 终止该栏目翻页
+            if new_count == 0:
+                _log(f"\033[33m[采集] 站点「{name}」：本页公告均早于收集时间范围，触发时间熔断停止采集\033[0m")
+                reached_max = False
                 break
+        if reached_max and page_depth > 1:
+            _log(f"[采集] 站点「{name}」栏目「{stage}」：到达最大翻页数（{page_depth}页）停止采集")
         # 栏目间随机延时，规避反爬
         time.sleep(0.5 + random.random() * 0.7)
     return items
@@ -474,6 +601,7 @@ def fetch_api_json(url: str, body: dict, retries: int = 3, form: bool = False, r
     sign_key 非空时启用福建式签名：body 注入毫秒时间戳 ts，
     对排除空值后的参数按 key 大写排序拼接（对象/数组用 JSON 序列化），
     计算 MD5(密钥+拼接串) 小写作 portal-sign 头。"""
+    domain_delay(url)
     headers = dict(BROWSER_HEADERS)
     if form:
         headers.update({"Content-Type": "application/x-www-form-urlencoded"})
@@ -509,55 +637,74 @@ def fetch_api_json(url: str, body: dict, retries: int = 3, form: bool = False, r
         except Exception as exc:  # noqa: BLE001
             last = exc
             if attempt < retries:
-                time.sleep(1.5 * attempt + random.random())
+                time.sleep(min(8, 2 ** attempt) + random.uniform(0, 0.5))
     raise last
 
 
 def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7):
     """深圳公共资源交易中心 JSON API 源。日期范围用接口参数精确控制，分页拉取。
     回溯天数大时按周分段深挖（深圳接口支持 releaseTimeBegin/End，逐段翻页可覆盖更久历史）；
-    单段内翻页直到本页 0 新增或覆盖到段首。"""
+    单段内翻页直到本页 0 新增或覆盖到段首。
+    - 后台表单「最多翻页数」（parse.api_max_pages / 顶层 api_max_pages / page_depth）可覆盖默认深度；
+    - 单站点 800 条上限；连续 3 次请求失败跳过站点；日志打印 站点/段/第X页/本页条数/停止原因。"""
     api_url = src["api_url"]
+    name = src.get("name", src.get("key", "szggzy"))
+    parse = dict(src.get("parse") or {})
+    max_pages = int(parse.get("api_max_pages") or src.get("api_max_pages") or src.get("page_depth")
+                    or dynamic_depth(days) or 5)
     items = []
-    max_pages = dynamic_depth(days)
+    consec_fail = 0
     cutoff_num = cutoff.replace("-", "")
-    # 分段：days<=14 不分段；否则按 7 天一段（单日查询 API 语义异常，7 天窗口更稳），从 end 往 cutoff 排
+    # 分段：统一按 3 天一段（深市源数据极密，政府采购频道 3 天可达 500-1000 条；
+    # 7 天段会触发 API 单窗口 1000 条封顶/800 条上限，导致窗口内靠前的公告被挤出）。
+    # 小段让每段数据量落在 800 条上限内或接近，翻到段起点日期即时间熔断，不漏靠前公告。
     segments = []
-    if days <= 14:
-        segments.append((cutoff, end_date))
-    else:
-        step = 7
-        seg_end = end_date
-        seg_begin = (datetime.strptime(end_date, "%Y-%m-%d") - timedelta(days=step - 1)).strftime("%Y-%m-%d")
-        while seg_begin >= cutoff:
-            segments.append((seg_begin, seg_end))
-            seg_end = (datetime.strptime(seg_begin, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-            seg_begin = (datetime.strptime(seg_begin, "%Y-%m-%d") - timedelta(days=step)).strftime("%Y-%m-%d")
-        if seg_begin < cutoff:
-            last = (datetime.strptime(seg_end, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-            if last >= cutoff:
-                segments.append((cutoff, last))
+    step = 3
+    seg_end = end_date
+    seg_begin = (datetime.strptime(end_date, "%Y-%m-%d") - timedelta(days=step - 1)).strftime("%Y-%m-%d")
+    while seg_begin >= cutoff:
+        segments.append((seg_begin, seg_end))
+        seg_end = (datetime.strptime(seg_begin, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+        seg_begin = (datetime.strptime(seg_begin, "%Y-%m-%d") - timedelta(days=step)).strftime("%Y-%m-%d")
+    if seg_begin < cutoff:
+        last = (datetime.strptime(seg_end, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+        if last >= cutoff:
+            segments.append((cutoff, last))
     for ch in src.get("channels", []):
+        ch_name = src["channel_names"].get(ch, str(ch))
         for seg_begin, seg_end in segments:
             seg_seen = set()
             page = 0
+            reached_max = True
             while page < max_pages:
+                if len(items) >= 800:
+                    _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限800条，停止采集\033[0m")
+                    return items
                 body = {
                     "channelId": ch,
                     "fields": [],
                     "title": None,
                     "releaseTimeBegin": seg_begin,          # YYYY-MM-DD
-                    "releaseTimeEnd": seg_end,
+                    # 注意：szggzy API 的 releaseTimeEnd 是排他上限（实际匹配 releaseTime <= end 当日 00:00）。
+                    # 传 seg_end 次日才能覆盖 seg_end 全天数据，否则当天大部分公告（如晚上发布）会被漏掉。
+                    "releaseTimeEnd": (datetime.strptime(seg_end, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d"),
                     "page": page,
                     "size": 100,
                 }
                 try:
                     data = fetch_api_json(api_url, body)
                 except Exception as exc:  # noqa: BLE001
-                    items.append({"error": f"{api_url} channel={ch}: {exc}"})
+                    consec_fail += 1
+                    _log(f"\033[31m[采集] 站点「{name}」段[{seg_begin}~{seg_end}]第{page}页请求失败（连续 {consec_fail}/3）：{exc}\033[0m")
+                    if consec_fail >= 3:
+                        _log(f"\033[31m[采集] 站点「{name}」：连续3次请求失败，跳过该站点\033[0m")
+                        return items
                     break
+                consec_fail = 0
                 content = (data or {}).get("data", {}).get("content", []) or []
                 if not content:
+                    _log(f"[采集] 站点「{name}」段[{seg_begin}~{seg_end}]：接口无更多数据，停止采集")
+                    reached_max = False
                     break
                 page_dates = []
                 page_new = 0
@@ -590,35 +737,44 @@ def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7):
                         "area": (it.get("areaName") or "") if isinstance(it, dict) else "",
                         "channel": src["channel_names"].get(ch, ""),
                     })
+                _log(f"[采集] 站点「{name}」[{ch_name}]段[{seg_begin}~{seg_end}]：第{page}页 | 本页解析 {page_new} 条")
                 # 本页无新增（已翻完或全是段内重复）→ 该段翻完
                 if page_new == 0:
+                    _log(f"\033[33m[采集] 站点「{name}」：本页无新增，触发时间熔断停止采集\033[0m")
+                    reached_max = False
                     break
                 # 本页所有日期都早于段起始日期 → 已翻到范围外，提前停止
                 if page_dates and all(d.replace("-", "") < seg_begin.replace("-", "") for d in page_dates):
+                    _log(f"\033[33m[采集] 站点「{name}」：本页公告早于收集时间范围，触发时间熔断停止采集\033[0m")
+                    reached_max = False
                     break
                 page += 1
                 time.sleep(0.2 + random.random() * 0.3)
+            if reached_max and max_pages > 1:
+                _log(f"[采集] 站点「{name}」[{ch_name}]段[{seg_begin}~{seg_end}]：到达最大翻页数（{max_pages}页）停止采集")
     return items
 
 
 def save_detected_selector(root: str, key: str, parse: dict):
-    """把自动探测成功的选择器回填到本地配置 sources_config.local.json，下次采集直接复用（0 积分）。"""
-    local_path = os.path.join(root, LOCAL_CONFIG)
-    data = {}
-    if os.path.exists(local_path):
+    """把自动探测成功的选择器回填到本地配置 sources_config.local.json，下次采集直接复用（0 积分）。
+    线程安全：并发采集时多个源可能同时写本地配置。"""
+    with _SELECTOR_LOCK:
+        local_path = os.path.join(root, LOCAL_CONFIG)
+        data = {}
+        if os.path.exists(local_path):
+            try:
+                data = json.load(open(local_path, encoding="utf-8"))
+            except Exception:  # noqa: BLE001
+                data = {}
+        detected = data.get("detected_selectors", {}) or {}
+        detected[key] = parse
+        data["detected_selectors"] = detected
         try:
-            data = json.load(open(local_path, encoding="utf-8"))
+            with open(local_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return True
         except Exception:  # noqa: BLE001
-            data = {}
-    detected = data.get("detected_selectors", {}) or {}
-    detected[key] = parse
-    data["detected_selectors"] = detected
-    try:
-        with open(local_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        return True
-    except Exception:  # noqa: BLE001
-        return False
+            return False
 
 
 def parse_custom_source(src, cutoff: str, root: str = "", auto_detect: bool = True):
@@ -667,17 +823,34 @@ def parse_custom_source(src, cutoff: str, root: str = "", auto_detect: bool = Tr
         print(f"\033[31m[⚠ 该站点已关闭AI自动探测，选择器为空，跳过：{src.get('name','?')}，不消耗积分]\033[0m")
         stats["skipped"] = True
         return [], stats
-    # 翻页抓取
+    # 翻页抓取（page_depth=0 表示仅采集第一页；or 1 保证至少翻第一页）
+    name = src.get("name", src.get("key", "?"))
+    consec_fail = 0
+    reached_max = True
     for page in range(1, page_depth + 1):
+        if len(items) >= 800:
+            _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限800条，停止采集\033[0m")
+            return items, stats
         url = list_url if page == 1 else (page_pattern.replace("{page}", str(page)) if page_pattern else "")
         if not url:
+            reached_max = False
             break
         try:
             html = fetch_with_requests(url, src.get("cookies"))
         except Exception as exc:  # noqa: BLE001
-            items.append({"error": f"{url}: {exc}"})
+            if _is_404(exc):
+                _log(f"[采集] 站点「{name}」：第{page}页不存在(404)，该站点翻页结束")
+                reached_max = False
+                break
+            consec_fail += 1
+            _log(f"\033[31m[采集] 站点「{name}」：第{page}页请求失败（连续 {consec_fail}/3）：{exc}\033[0m")
+            if consec_fail >= 3:
+                _log(f"\033[31m[采集] 站点「{name}」：连续3次请求失败，跳过该站点\033[0m")
+                stats["skipped"] = True
+                return items, stats
             time.sleep(1.0 + random.random())
             continue
+        consec_fail = 0
         # JS 动态页面检测：第一页即判断，动态直接跳过
         if page == 1 and is_dynamic_page(html):
             print(f"\033[31m[⚠ 该站点为JS动态渲染页面，静态爬虫无法解析，跳过：{src.get('name','?')}，不消耗AI积分]\033[0m")
@@ -704,6 +877,7 @@ def parse_custom_source(src, cutoff: str, root: str = "", auto_detect: bool = Tr
                 print(f"\033[31m[auto] 站点 {src.get('name','?')} 自动探测未识别到有效列表结构，跳过，0 积分\033[0m")
                 stats["fail"] += 1
                 return items, stats
+        page_start = len(items)
         try:
             if ptype == "css":
                 items.extend(_parse_css(html, parse, link_prefix, default_stage, cutoff, list_url))
@@ -711,10 +885,19 @@ def parse_custom_source(src, cutoff: str, root: str = "", auto_detect: bool = Tr
                 items.extend(_parse_regex(html, parse, link_prefix, default_stage, cutoff, list_url))
             else:
                 items.append({"error": f"{url}: 不支持的解析类型 {ptype}"})
+                reached_max = False
                 break
         except Exception as exc:  # noqa: BLE001
             items.append({"error": f"{url}: 解析失败 {exc}"})
-        time.sleep(0.8 + random.random())
+        new_count = len(items) - page_start
+        _log(f"[采集] 站点「{name}」：第{page}页 | 本页解析 {new_count} 条")
+        # 时间熔断：本页无新增（公告全部早于收集时间范围）→ 终止翻页
+        if new_count == 0:
+            _log(f"\033[33m[采集] 站点「{name}」：本页公告均早于收集时间范围，触发时间熔断停止采集\033[0m")
+            reached_max = False
+            break
+    if reached_max and page_depth > 1:
+        _log(f"[采集] 站点「{name}」：到达最大翻页数（{page_depth}页）停止采集")
     stats["ok"] = sum(1 for it in items if "error" not in it)
     stats["fail"] = sum(1 for it in items if "error" in it)
     return items, stats
@@ -769,7 +952,14 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
     sign_key = src.get("api_sign_key", "") or parse.get("api_sign_key", "") or ""
     decrypt_cfg = src.get("api_decrypt", {}) or parse.get("api_decrypt", {}) or {}
     items = []
-    for page in range(page_start, page_start + int(src.get("api_max_pages", parse.get("api_max_pages", 5)) or 5)):
+    max_pages = int(src.get("api_max_pages", parse.get("api_max_pages", 5)) or 1)  # 0 → 仅采集第一页
+    name = src.get("name", src.get("key", "?"))
+    consec_fail = 0
+    reached_max = True
+    for page in range(page_start, page_start + max_pages):
+        if len(items) >= 800:
+            _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限800条，停止采集\033[0m")
+            break
         body = dict(params)
         page_val = page * size if page_calc == "multiply" else page
         body.update({page_field: page_val, size_field: size})
@@ -789,8 +979,13 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
         try:
             data = fetch_api_json(api_url, body, form=form_mode, referer=referer, sign_key=sign_key)
         except Exception as exc:  # noqa: BLE001
-            items.append({"error": f"{api_url}: {exc}"})
-            break
+            consec_fail += 1
+            _log(f"\033[31m[采集] 站点「{name}」：第{page}页请求失败（连续 {consec_fail}/3）：{exc}\033[0m")
+            if consec_fail >= 3:
+                _log(f"\033[31m[采集] 站点「{name}」：连续3次请求失败，跳过该站点\033[0m")
+                break
+            continue
+        consec_fail = 0
         # 响应解密（福建式：Data 字段 base64+AES 后为 JSON 字符串）
         if decrypt_cfg and isinstance(data, dict):
             enc = data.get("Data") or data.get("data") or ""
@@ -804,6 +999,7 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
             else:
                 data = None
         if data is None:
+            reached_max = False
             break
         # 定位列表字段
         content = data
@@ -840,7 +1036,9 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
         if isinstance(content, dict) and isinstance(content.get("list"), list):
             content = content["list"]
         if not isinstance(content, list) or not content:
+            reached_max = False
             break
+        page_start_len = len(items)
         for it in content:
             if not isinstance(it, dict):
                 continue
@@ -865,8 +1063,28 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
                     href = ""
             href = abs_url(api_url, href, prefix)
             items.append({"title": title, "url": href, "date": date, "stage": stage})
-        if len(content) < size:
+        new_count = len(items) - page_start_len
+        _log(f"[采集] 站点「{name}」：第{page}页 | 本页解析 {new_count} 条")
+        # 时间熔断：本页第一条公告日期早于收集时间范围 → 终止翻页
+        first_date = ""
+        if isinstance(content[0], dict):
+            first_date = str(content[0].get(date_f) or "")[:10]
+            if src.get("api_date_field_ms") or parse.get("api_date_field_ms"):
+                try:
+                    ms = int(content[0].get(date_f) or 0)
+                    first_date = (datetime.fromtimestamp(ms / 1000)).strftime("%Y-%m-%d")
+                except Exception:  # noqa: BLE001
+                    first_date = str(content[0].get(date_f) or "")[:10]
+        if first_date and first_date.replace("-", "") < cutoff:
+            _log(f"\033[33m[采集] 站点「{name}」：本页第一条公告日期早于收集时间范围，触发时间熔断停止采集\033[0m")
+            reached_max = False
             break
+        if len(content) < size:
+            _log(f"[采集] 站点「{name}」：接口已返回全部数据，停止采集")
+            reached_max = False
+            break
+    if reached_max and max_pages > 1:
+        _log(f"[采集] 站点「{name}」：到达最大翻页数（{max_pages}页）停止采集")
     return items
 
 
@@ -1011,10 +1229,9 @@ def main():
     total_reused = []
     total_dynamic = []
     total_skipped = []
-    for src in all_sources:
+    def run_one(src):
+        """单源采集（线程池 worker）：返回 (key, parsed_items, stats)。"""
         key = src.get("key")
-        if only_keys and key not in only_keys:
-            continue
         if key in ("ccgp", "csg"):
             parsed = parse_source(src, cutoff, days)
             stats = {"ok": sum(1 for e in parsed if "error" not in e),
@@ -1029,6 +1246,27 @@ def main():
                      "skipped": False, "reused": False}
         else:
             parsed, stats = parse_custom_source(src, cutoff, root, auto_detect)
+        return key, parsed, stats
+
+    # 全局并发限制：最多同时并发 2 个网站采集，避免一次性全部网站同时跑导致卡死/被封
+    targets = [s for s in all_sources if not (only_keys and s.get("key") not in only_keys)]
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
+        futs = [ex.submit(run_one, s) for s in targets]
+        for fut in concurrent.futures.as_completed(futs):
+            try:
+                key, parsed, stats = fut.result()
+            except Exception as exc:  # noqa: BLE001
+                print(f"\033[31m[源] 未知异常: {exc}\033[0m", file=sys.stderr)
+                continue
+            results[key] = (parsed, stats)
+    # 按源顺序汇总输出（日志有序）
+    for src in all_sources:
+        key = src.get("key")
+        if key not in results:
+            continue
+        parsed, stats = results[key]
+        if key not in ("ccgp", "csg", "szggzy"):
             total_ai_calls += stats.get("ai_calls", 0)
             if stats.get("detected"):
                 total_detected.append(src.get("name", key))
@@ -1066,15 +1304,26 @@ def main():
           + (f" | 动态跳过: {', '.join(total_dynamic)}" if total_dynamic else "")
           + (f" | 开关跳过: {', '.join(total_skipped)}" if total_skipped else ""))
 
-    # 去重（跨源同标题去重：不同源同步发布的同一公告只保留一条）
-    seen = set()
+    # 去重：优先使用公告详情 url 作为唯一 key；
+    # 对 url 不变、靠参数加载内容的站点，叠加标题+发布日期做二次去重，避免重复入库
+    seen_url = {}
+    seen_td = set()
     unique = []
     for it in all_items:
-        key = (it["title"], it["date"])
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(it)
+        u = it.get("url") or ""
+        td = (it["title"], it.get("date", ""))
+        if u.startswith("http"):
+            if u not in seen_url:
+                seen_url[u] = {td}
+                unique.append(it)
+            elif td not in seen_url[u]:
+                seen_url[u].add(td)
+                unique.append(it)
+        else:
+            if td in seen_td:
+                continue
+            seen_td.add(td)
+            unique.append(it)
 
     # 过滤：省份 + 关键词 + 阶段多选
     filtered = []
@@ -1100,8 +1349,13 @@ def main():
 
     filtered.sort(key=lambda x: (x["date"], x["source"]), reverse=True)
 
-    # ===== 累积合并：读取历史 data.json，与新抓取结果按 (title,date) 去重合并 =====
+    # ===== 累积合并：读取历史 data.json，与新抓取结果合并（url 优先，同 url 再按标题+日期） =====
     # 每次抓取只覆盖窗口内数据，历史通过累积保留 → 回溯天数加大后看板能显示更久之前的数据
+    def merge_key(it):
+        u = it.get("url") or ""
+        if u.startswith("http"):
+            return ("u", u, it.get("title", ""), it.get("date", ""))
+        return ("td", it.get("title", ""), it.get("date", ""))
     data_path = os.path.join(data_dir, "data.json")
     prev_items = []
     prev_new_count = 0
@@ -1116,11 +1370,11 @@ def main():
     merged = {}
     for it in prev_items:
         if isinstance(it, dict) and it.get("title"):
-            merged[(it["title"], it.get("date", ""))] = it
+            merged[merge_key(it)] = it
     fresh_keys = set()
     for it in filtered:
-        merged[(it["title"], it.get("date", ""))] = it
-        fresh_keys.add((it["title"], it.get("date", "")))
+        merged[merge_key(it)] = it
+        fresh_keys.add(merge_key(it))
     # 排序（新的在前），超上限截断保留最近
     merged_items = sorted(merged.values(), key=lambda x: (x.get("date", ""), x.get("source", "")), reverse=True)
     if len(merged_items) > 20000:
@@ -1139,7 +1393,7 @@ def main():
     new_count = 0
     for it in filtered:
         k = (it["title"], it["date"])
-        it["is_new"] = k in fresh_keys and k not in seen_keys
+        it["is_new"] = merge_key(it) in fresh_keys and k not in seen_keys
         if it["is_new"]:
             new_count += 1
     # 更新已见库（本次 key 全部并入，超上限截断保留最近）
