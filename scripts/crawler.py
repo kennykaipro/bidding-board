@@ -684,9 +684,9 @@ def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7):
                 if seg_items >= 1000:
                     _log(f"\033[33m[采集] 站点「{name}」[{ch_name}]段[{seg_begin}~{seg_end}]：本段达到1000条上限，继续下一段\033[0m")
                     break
-                # 站点级上限：整个站点总量保护，防止数据爆炸
-                if len(items) >= 5000:
-                    _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限5000条，停止采集\033[0m")
+                # 站点级上限：整个站点总量保护，防止数据爆炸（用户要求收录全，按 20000 保护）
+                if len(items) >= 20000:
+                    _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限20000条，停止采集\033[0m")
                     return items
                 body = {
                     "channelId": ch,
@@ -928,6 +928,201 @@ def _aes_decrypt_payload(data, key: str, iv: str, encoding: str = "base64"):
     return unpad(cipher.decrypt(raw), 16).decode("utf-8", errors="ignore")
 
 
+def _parse_api_json_segmented(src, cutoff: str, end_date: str):
+    """通用 JSON-API 源分段深挖版：按 api_seg_days 天一段（默认3天）逐段翻页，
+    每段翻到段首日期或本页无新增即停；段级上限 api_seg_limit（默认1000），
+    站点级上限 api_site_limit（默认20000）。
+    解决高密度 API 源（如深圳阳光采购平台）只翻最新几页、靠前时段公告被挤出的漏采问题。
+    配置：api_segmented=True 启用；api_date_begin_field/api_date_end_field 必配（段范围按此传参）。"""
+    # 日期参数统一规范化为 dash(YYYY-MM-DD)，兼容 main 传入的 compact(YYYYMMDD) 或 dash
+    def _dash(s):
+        s = str(s or "").replace("-", "")
+        return f"{s[:4]}-{s[4:6]}-{s[6:8]}" if len(s) == 8 else str(s or "")
+    cutoff = _dash(cutoff)
+    end_date = _dash(end_date)
+    parse = src.get("parse") or {}
+    api_url = src.get("api_url") or parse.get("api_url") or src.get("list_url")
+    params = dict(src.get("api_params", {}) or parse.get("api_params", {}) or {})
+    size = int(src.get("api_page_size", parse.get("api_page_size", 50)) or 50)
+    title_f = src.get("title_field", parse.get("title_field", "title"))
+    date_f = src.get("date_field", parse.get("date_field", "releaseTime"))
+    link_f = src.get("link_field", parse.get("link_field", "linkTo"))
+    prefix = src.get("link_prefix", "") or parse.get("link_prefix", "") or ""
+    link_tpl = src.get("link_template", "") or parse.get("link_template", "") or ""
+    stage = src.get("stage", "公告")
+    list_field = src.get("api_list_field", "") or parse.get("api_list_field", "") or ""
+    page_field = src.get("api_page_field", "") or parse.get("api_page_field", "") or "page"
+    size_field = src.get("api_size_field", "") or parse.get("api_size_field", "") or "size"
+    page_start = int(src.get("api_page_start", parse.get("api_page_start", 0)) or 0)
+    page_calc = src.get("api_page_calc", "") or parse.get("api_page_calc", "") or ""
+    form_mode = bool(src.get("api_form") or parse.get("api_form") or False)
+    referer = src.get("api_referer", "") or parse.get("api_referer", "") or ""
+    sign_key = src.get("api_sign_key", "") or parse.get("api_sign_key", "") or ""
+    decrypt_cfg = src.get("api_decrypt", {}) or parse.get("api_decrypt", {}) or {}
+    max_pages = int(src.get("api_max_pages", parse.get("api_max_pages", 120)) or 1)
+    seg_days = int(src.get("api_seg_days", parse.get("api_seg_days", 3)) or 3)
+    seg_limit = int(src.get("api_seg_limit", parse.get("api_seg_limit", 1000)) or 1000)
+    site_limit = int(src.get("api_site_limit", parse.get("api_site_limit", 20000)) or 20000)
+    name = src.get("name", src.get("key", "?"))
+    items = []
+    consec_fail = 0
+    # 按段构建段列表（从最新往早）
+    segments = []
+    seg_end = end_date
+    seg_begin = (datetime.strptime(end_date, "%Y-%m-%d") - timedelta(days=seg_days - 1)).strftime("%Y-%m-%d")
+    while seg_begin >= cutoff:
+        segments.append((seg_begin, seg_end))
+        seg_end = (datetime.strptime(seg_begin, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+        seg_begin = (datetime.strptime(seg_begin, "%Y-%m-%d") - timedelta(days=seg_days)).strftime("%Y-%m-%d")
+    if seg_begin < cutoff:
+        last = (datetime.strptime(seg_end, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+        if last >= cutoff:
+            segments.append((cutoff, last))
+    for seg_begin, seg_end in segments:
+        seg_seen = set()
+        seg_items = 0
+        reached_max = True
+        page = page_start
+        while page < page_start + max_pages:
+            if seg_items >= seg_limit:
+                _log(f"\033[33m[采集] 站点「{name}」段[{seg_begin}~{seg_end}]：本段达到{seg_limit}条上限，继续下一段\033[0m")
+                break
+            if len(items) >= site_limit:
+                _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限{site_limit}条，停止采集\033[0m")
+                return items
+            body = dict(params)
+            page_val = page * size if page_calc == "multiply" else page
+            body.update({page_field: page_val, size_field: size})
+            if src.get("api_date_begin_field"):
+                body[src["api_date_begin_field"]] = seg_begin
+            if src.get("api_date_end_field"):
+                # 排他上限：传次日覆盖段末全天
+                seg_end_next = (datetime.strptime(seg_end, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+                body[src["api_date_end_field"]] = seg_end_next
+            try:
+                data = fetch_api_json(api_url, body, form=form_mode, referer=referer, sign_key=sign_key)
+            except Exception as exc:  # noqa: BLE001
+                consec_fail += 1
+                _log(f"\033[31m[采集] 站点「{name}」段[{seg_begin}~{seg_end}]第{page}页请求失败（连续 {consec_fail}/3）：{exc}\033[0m")
+                if consec_fail >= 3:
+                    _log(f"\033[31m[采集] 站点「{name}」：连续3次请求失败，跳过该站点\033[0m")
+                    return items
+                break
+            consec_fail = 0
+            # 响应解密（福建式）
+            if decrypt_cfg and isinstance(data, dict):
+                enc = data.get("Data") or data.get("data") or ""
+                dec = _aes_decrypt_payload(enc, decrypt_cfg.get("key", ""), decrypt_cfg.get("iv", ""),
+                                           decrypt_cfg.get("encoding", "base64"))
+                if dec:
+                    try:
+                        data = json.loads(dec)
+                    except Exception:  # noqa: BLE001
+                        data = None
+                else:
+                    data = None
+            if data is None:
+                reached_max = False
+                break
+            content = data
+            if list_field:
+                for part in list_field.split("."):
+                    if isinstance(content, str):
+                        try:
+                            content = json.loads(content)
+                        except Exception:  # noqa: BLE001
+                            content = None
+                            break
+                    if isinstance(content, dict) and part in content:
+                        content = content[part]
+                    else:
+                        content = None
+                        break
+                if not isinstance(content, list):
+                    content = data
+                    for key in ("content", "list", "rows", "items", "data", "records"):
+                        if isinstance(content, dict) and key in content:
+                            content = content[key]
+                            if isinstance(content, str):
+                                try:
+                                    content = json.loads(content)
+                                except Exception:  # noqa: BLE001
+                                    content = None
+                                    break
+            else:
+                for key in ("content", "list", "rows", "items", "data", "records"):
+                    if isinstance(content, dict) and key in content:
+                        content = content[key]
+            if isinstance(content, dict) and isinstance(content.get("content"), list):
+                content = content["content"]
+            if isinstance(content, dict) and isinstance(content.get("list"), list):
+                content = content["list"]
+            if not isinstance(content, list) or not content:
+                reached_max = False
+                break
+            page_start_len = len(items)
+            page_new = 0
+            for it in content:
+                if not isinstance(it, dict):
+                    continue
+                title = str(it.get(title_f) or "").strip()
+                if not title:
+                    continue
+                date = str(it.get(date_f) or "")[:10]
+                if src.get("api_date_field_ms") or parse.get("api_date_field_ms"):
+                    try:
+                        ms = int(it.get(date_f) or 0)
+                        date = (datetime.fromtimestamp(ms / 1000)).strftime("%Y-%m-%d")
+                    except Exception:  # noqa: BLE001
+                        date = str(it.get(date_f) or "")[:10]
+                if date and date.replace("-", "") < cutoff.replace("-", ""):
+                    continue
+                key = (title, date)
+                if key in seg_seen:
+                    continue
+                seg_seen.add(key)
+                page_new += 1
+                href = str(it.get(link_f) or "")
+                if link_tpl and not href:
+                    try:
+                        d = dict(it)
+                        tcode = str(it.get("noticeTypeCode") or "")
+                        d["code"] = tcode.split("_")[-1] if "_" in tcode else ""
+                        href = link_tpl.format(**d)
+                    except Exception:  # noqa: BLE001
+                        href = ""
+                href = abs_url(api_url, href, prefix)
+                items.append({"title": title, "url": href, "date": date, "stage": stage})
+                seg_items += 1
+            _log(f"[采集] 站点「{name}」段[{seg_begin}~{seg_end}]：第{page}页 | 本页解析 {page_new} 条")
+            if page_new == 0:
+                _log(f"\033[33m[采集] 站点「{name}」段[{seg_begin}~{seg_end}]：本页无新增，触发时间熔断\033[0m")
+                reached_max = False
+                break
+            first_date = ""
+            if isinstance(content[0], dict):
+                first_date = str(content[0].get(date_f) or "")[:10]
+                if src.get("api_date_field_ms") or parse.get("api_date_field_ms"):
+                    try:
+                        ms = int(content[0].get(date_f) or 0)
+                        first_date = (datetime.fromtimestamp(ms / 1000)).strftime("%Y-%m-%d")
+                    except Exception:  # noqa: BLE001
+                        first_date = str(content[0].get(date_f) or "")[:10]
+            if first_date and first_date.replace("-", "") < seg_begin.replace("-", ""):
+                _log(f"\033[33m[采集] 站点「{name}」段[{seg_begin}~{seg_end}]：本页公告早于段起始，触发时间熔断\033[0m")
+                reached_max = False
+                break
+            if len(content) < size:
+                _log(f"[采集] 站点「{name}」段[{seg_begin}~{seg_end}]：接口已返回全部数据，停止采集")
+                reached_max = False
+                break
+            page += 1
+            time.sleep(0.2 + random.random() * 0.3)
+        if reached_max and max_pages > 1:
+            _log(f"[采集] 站点「{name}」段[{seg_begin}~{seg_end}]：到达最大翻页数（{max_pages}页）停止采集")
+    return items
+
+
 def _parse_api_json_custom(src, cutoff: str, end_date: str):
     """通用 JSON-API 源：POST JSON 请求，配置 api_params / api_page_size / 字段映射。
     兼容两种配置位置：顶层（旧）或 src.parse 内（admin 自助表单写入的 v2 结构）。
@@ -940,6 +1135,9 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
       - api_sign_key：福建式 MD5 签名（portal-sign）
       - api_decrypt：响应 Data 字段 AES-CBC 解密，{key, iv, encoding}
       - api_page_start：起始页码（部分接口从 1 开始，如福建 PageNo）"""
+    # 高密度源分段深挖：配置 api_segmented=True 时走分段版，逐段往前收全，不漏靠前公告
+    if src.get("api_segmented") or (src.get("parse") or {}).get("api_segmented"):
+        return _parse_api_json_segmented(src, cutoff, end_date)
     parse = src.get("parse") or {}
     api_url = src.get("api_url") or parse.get("api_url") or src.get("list_url")
     params = dict(src.get("api_params", {}) or parse.get("api_params", {}) or {})
@@ -973,15 +1171,18 @@ def _parse_api_json_custom(src, cutoff: str, end_date: str):
         page_val = page * size if page_calc == "multiply" else page
         body.update({page_field: page_val, size_field: size})
         date_time = bool(src.get("api_date_field_time") or parse.get("api_date_field_time") or False)
+        # 日期参数规范化：兼容 compact(YYYYMMDD) 与 dash(YYYY-MM-DD) 两种传入格式
+        cutoff_c = str(cutoff or "").replace("-", "")
+        end_c = str(end_date or "").replace("-", "")
         if src.get("api_date_begin_field"):
-            b = f"{cutoff[:4]}-{cutoff[4:6]}-{cutoff[6:8]}"
+            b = f"{cutoff_c[:4]}-{cutoff_c[4:6]}-{cutoff_c[6:8]}"
             body[src["api_date_begin_field"]] = b + (" 00:00:00" if date_time else "")
         if src.get("api_date_end_field"):
-            e = f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]}"
+            e = f"{end_c[:4]}-{end_c[4:6]}-{end_c[6:8]}"
             body[src["api_date_end_field"]] = e + (" 23:59:59" if date_time else "")
         if src.get("api_time_field"):
-            tf_start = f"{cutoff} 00:00:00" if not src.get("api_time_field_dash", parse.get("api_time_field_dash", False)) else f"{cutoff[:4]}-{cutoff[4:6]}-{cutoff[6:8]} 00:00:00"
-            tf_end = f"{end_date} 23:59:59" if not src.get("api_time_field_dash", parse.get("api_time_field_dash", False)) else f"{end_date[:4]}-{end_date[4:6]}-{end_date[6:8]} 23:59:59"
+            tf_start = f"{cutoff_c[:4]}-{cutoff_c[4:6]}-{cutoff_c[6:8]} 00:00:00"
+            tf_end = f"{end_c[:4]}-{end_c[4:6]}-{end_c[6:8]} 23:59:59"
             body[src["api_time_field"]] = [{"fieldName": time_field_name,
                                             "startTime": tf_start,
                                             "endTime": tf_end}]
