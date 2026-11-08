@@ -1,13 +1,13 @@
 {
- "generated_at": "2026-11-08 16:48",
+ "generated_at": "2026-11-08 16:59",
  "window_days": 180,
  "settings": {
   "date_range_days": 180,
   "stages": [],
   "auto_detect": true
  },
- "total": 8797,
- "new_count": 13,
+ "total": 8812,
+ "new_count": 82,
  "ai_stats": {
   "ai_calls": 0,
   "detected": [],
@@ -51640,7 +51640,7 @@
    "matched_keywords": [
     "多功能"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳平乐骨伤科医院（深圳市坪山区中医院）无陪护病房免陪照护智能管理系统建设项目的采购公告",
@@ -52106,7 +52106,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市坪山区人民法院审判法庭配套楼宇智能化建设项目第三方测评的采购结果公告",
@@ -60108,7 +60108,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳都市圈城际铁路动车基地及调度指挥中心工程、深圳市五和综合交通枢纽工程及深圳市坪山综合交通枢纽一期工程BIM总体管理与技术应用服务开标情况",
@@ -60302,7 +60302,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "广东省深圳生态环境监测中心站大气污染传输通道研判识别服务和空气质量预报预警及溯源智能体服务中标（成交）结果公告",
@@ -60335,7 +60335,7 @@
     "智慧城市",
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "关于深圳市盐田区城市管理监督指挥中心2026年编外人员体检服务项目的采购失败公告",
@@ -60447,9 +60447,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "智慧"
+    "智慧城市"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【省本级】娄烦县中环100MW集中式光伏发电项目EPC总承包项目(1标段)招标公告",
@@ -65125,11 +65125,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "音视频",
-    "视频",
-    "会议"
+    "音视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市公安局雪亮工程四期后端智慧视频云工程项目初步设计及概算编制服务的采购公告",
@@ -65143,10 +65141,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "智慧",
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "关于深圳市第二高级中学宝安高中部基础信息化及智能安防设备的采购失败公告",
@@ -65679,7 +65676,7 @@
    "matched_keywords": [
     "多功能"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【省本级】国道307线汾阳至晋陕界改线工程施工监理招标变更公告",
@@ -69986,7 +69983,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "中共深圳市南山区委党校二期建设工程配套信息化项目第三方验收测评、等保测评及密评服务项目的采购结果公告",
@@ -70016,9 +70013,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "信息化"
+    "信息化建设"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "沙湾河深圳水库截排工程信息化系统采购最高投标限价",
@@ -70115,6 +70112,118 @@
     "消防"
    ],
    "is_new": false
+  },
+  {
+   "title": "深圳市红山中学民治校区采购多功能报告厅设施设备（A）招标公告",
+   "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261102/0ac5b13a-2383-4b93-b3fb-ae58d4171e46.html",
+   "date": "2026-11-02",
+   "stage": "招标",
+   "area": "龙华区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "多功能"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "深圳市布心中学四楼412教室教室设备 智能化、网络、多媒体设备采购项目的采购结果公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20725054",
+   "date": "2026-11-02",
+   "stage": "中标",
+   "area": "罗湖区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "多媒体"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "深圳市第二高级中学宝安高中部田径场扩声系统的采购公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20724984",
+   "date": "2026-11-02",
+   "stage": "招标",
+   "area": "市本级",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "扩声"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "深圳市布心中学一楼111教室 智能化、网络、多媒体设备‌采购项目的采购结果公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20724920",
+   "date": "2026-11-02",
+   "stage": "中标",
+   "area": "罗湖区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "多媒体"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "深圳市当代艺术与城市规划馆A3展厅灯膜与灯光采购项目的采购公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20724586",
+   "date": "2026-11-02",
+   "stage": "规划",
+   "area": "市本级",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "灯光"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "【变更合同】深圳市儿童医院龙华院区配套信息化建设项目-数字化手术室项目合同公示",
+   "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002001/20261102/f3a91d34-1004-4189-a872-3906402b5273.html",
+   "date": "2026-11-02",
+   "stage": "更正",
+   "area": "市本级",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "信息化建设"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "深圳市宝安区妇幼保健院-宝安区儿童医院信息化建设项目A包中标（成交）结果公告",
+   "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001004/002001004001/20261102/8f8ac7aa-d167-4ea4-a247-f7bc05f0cffc.html",
+   "date": "2026-11-02",
+   "stage": "中标",
+   "area": "宝安区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "信息化建设"
+   ],
+   "is_new": true
   },
   {
    "title": "【省本级】山西煤炭运销集团新工煤业有限公司工业场地附属工程项目(1标段)招标公告延期公告",
@@ -72873,6 +72982,22 @@
    "is_new": false
   },
   {
+   "title": "深圳国际仲裁院档案整理及档案数字化加工项目的采购公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20722283",
+   "date": "2026-10-31",
+   "stage": "招标",
+   "area": "南山区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "数字化"
+   ],
+   "is_new": true
+  },
+  {
    "title": "【省本级】兴县嘉源煤业有限公司瓶装液化石油气标准站EPC总承包项目招标二次延期公告",
    "url": "http://prec.sxzwfw.gov.cn:80/jyxxgcgz/1109733.jhtml",
    "date": "2026-10-31",
@@ -73166,7 +73291,7 @@
    "matched_keywords": [
     "多功能"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市中西医结合医院视频脑电监测系统等设备一批采购（A）招标公告",
@@ -73182,7 +73307,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "国家技术标准创新基地（深圳）会议设备采购（A）招标公告",
@@ -73198,7 +73323,7 @@
    "matched_keywords": [
     "会议"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市公安局南山分局视频监控联网及监控补盲服务采购中标（成交）结果公告",
@@ -73214,7 +73339,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【初始合同】深圳市宝安区航城街道办事处航城街道高清视频监控系统维保服务项目合同公示",
@@ -73230,7 +73355,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市罗湖区智慧城市建设中心信息化基础设备运维保障经费（采购）意向公开",
@@ -73246,7 +73371,7 @@
    "matched_keywords": [
     "智慧城市"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市宝安区空海医院、深圳市宝安区儿童医院数字化摄影X射线机（悬吊+双板）、高压注射器等一批采购项目（A）招标公告",
@@ -73262,7 +73387,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【省本级】阳城县紧密型县域医共体建设项目施工（第一标段）招标延期公告",
@@ -75270,7 +75395,7 @@
    "matched_keywords": [
     "会议"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "关于深圳市宝安区卫生健康局“宝医数智”大模型平台建设项目密评安全性评估及第三方检测服务的更正公告",
@@ -75463,7 +75588,7 @@
    "matched_keywords": [
     "会议"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市教育局2026年校园智能安防建设意向公开",
@@ -75528,7 +75653,7 @@
    "matched_keywords": [
     "视频会议"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳银湖会议中心（酒店）有限公司韶华楼负一层室内游泳池、健身房、SPA房公开招租信息公告",
@@ -77854,9 +77979,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "智慧"
+    "智慧城市"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳职业技术大学智能制造技术研究院与集成电路关键材料研究院新实验场地改造修缮工程招标公告",
@@ -77982,9 +78107,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "人工智能"
+    "数字政府"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市龙华外国语高级中学数智作业与智能批改学情分析项目的采购结果公告",
@@ -78271,10 +78396,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "监控",
-    "机房"
+    "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【初始合同】深圳市委政法委政务信息系统运营（信息网络安全部分）项目合同公示",
@@ -78530,7 +78654,39 @@
    "matched_keywords": [
     "会议"
    ],
-   "is_new": false
+   "is_new": true
+  },
+  {
+   "title": "2026年租赁深圳君悦酒店会议室的采购结果公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20712384",
+   "date": "2026-10-27",
+   "stage": "中标",
+   "area": "罗湖区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "会议"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "2026年租赁深圳瑞吉酒店会议室的采购结果公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20711647",
+   "date": "2026-10-27",
+   "stage": "中标",
+   "area": "罗湖区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "会议"
+   ],
+   "is_new": true
   },
   {
    "title": "【省本级】大秦铁路股份有限公司太原供电段岚县牵引变电所增设动态无功补偿装置改造工程建设单位管理甲供物资（2标段）招标失败公告",
@@ -79114,7 +79270,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳大学城图书馆信息化系统基础硬件设施升级改造项目-超融合服务器采购（A）招标公告",
@@ -79225,10 +79381,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "信息化",
-    "智慧"
+    "信息化建设"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【初始合同】北京大学深圳医院无线网络改造项目合同公示",
@@ -79437,6 +79592,70 @@
     "音乐厅"
    ],
    "is_new": false
+  },
+  {
+   "title": "关于深圳市宝安区妇幼保健院-宝安区儿童医院口腔综合治疗台（多功能）一批采购项目的更正公告",
+   "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001008/002001008003/20261026/3749c745-15e5-45bf-9251-f7b152a88e9f.html",
+   "date": "2026-10-26",
+   "stage": "更正",
+   "area": "宝安区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "多功能"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "深圳市公安局福田分局出入境管理大队2026年多功能警务自助服务平台和出入境窗口智慧受理台维保服务项目（重新招标）的采购结果公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20710043",
+   "date": "2026-10-26",
+   "stage": "中标",
+   "area": "福田区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "多功能"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "深圳信息职业技术大学财经数字化联合创新中心（服务器）竞价采购竞价公告",
+   "url": "http://zfcg.szggzy.com:8081/gsgg/002001/002001002/002001002001/20261026/9c9c4818-a507-4134-9c84-08adaef3b290.html",
+   "date": "2026-10-26",
+   "stage": "招标",
+   "area": "市本级",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "数字化"
+   ],
+   "is_new": true
+  },
+  {
+   "title": "【初始合同】深圳市宝安区人民医院整体改造工程（二期）配套医疗设备购置、信息化建设及首次开办配置项目信息化工程部分-数字化手术室项目合同公示",
+   "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002001/20261026/4fe98ed0-f275-4ce1-88b9-3aefdd737bbb.html",
+   "date": "2026-10-26",
+   "stage": "其他",
+   "area": "宝安区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "信息化建设"
+   ],
+   "is_new": true
   },
   {
    "title": "【省本级】山西省主要污染物排污权交易结果公告",
@@ -79719,6 +79938,22 @@
    "is_new": false
   },
   {
+   "title": "深圳市儿童医院龙华院区配套信息化建设项目-数字化手术室项目合同公示",
+   "url": "http://zfcg.szggzy.com:8081/gsgg/002002/002002002/20261025/4b25da02-c4d0-4050-b973-8afb956c6ce4.html",
+   "date": "2026-10-25",
+   "stage": "其他",
+   "area": "市本级",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "信息化建设"
+   ],
+   "is_new": true
+  },
+  {
    "title": "省建设厅关于暂停开展房屋建筑和市政基础设施工程有关企业信用评价工作的通知",
    "url": "https://ggzy.zj.gov.cn/xwzx/001002/20261024/5809f261-9268-4b53-be42-8d2cae127229.html",
    "date": "2026-10-24",
@@ -79850,7 +80085,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳技术大学OBE教学过程数字化评价系统采购（A）招标公告(重新采购第1次)",
@@ -79866,7 +80101,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "关于深圳市宝安区妇幼保健院-宝安区儿童医院口腔综合治疗台（多功能）一批采购项目的更正公告",
@@ -79882,7 +80117,7 @@
    "matched_keywords": [
     "多功能"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳河套学院交互式多媒体实验室设备采购项目中标（成交）结果公告",
@@ -79898,7 +80133,7 @@
    "matched_keywords": [
     "多媒体"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【初始合同】深圳市儿童医院龙华院区配套信息化建设项目-数字化手术室项目合同公示",
@@ -79914,7 +80149,7 @@
    "matched_keywords": [
     "信息化建设"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市龙岗区第七人民医院龙岭院区口腔科多功能口腔综合治疗台采购项目的采购公告",
@@ -79930,7 +80165,7 @@
    "matched_keywords": [
     "多功能"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市宝安区社会救助综合服务中心2026年救助档案数字化整理服务项目的采购结果公告",
@@ -79946,7 +80181,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳河套学院交互式多媒体实验室图形工作站采购项目中标（成交）结果公告",
@@ -79962,7 +80197,7 @@
    "matched_keywords": [
     "多媒体"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳职业技术大学深汕校区（开办）家具项目（会议室、多功能厅、休息室及教师公寓补配）意向公开",
@@ -79978,7 +80213,7 @@
    "matched_keywords": [
     "会议"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市罗湖区建筑工务署2026年档案整理和数字化服务项目的采购结果公告",
@@ -79994,7 +80229,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【延续合同】深圳市公安局罗湖分局智能视频巡逻服务二期项目合同公示",
@@ -80010,7 +80245,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【省本级】关于公示境外药品代理人变更信息的通知",
@@ -80464,7 +80699,7 @@
    "matched_keywords": [
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市大数据资源管理中心深圳市5G政务专网服务项目（2026年）意向公开",
@@ -80512,7 +80747,7 @@
    "matched_keywords": [
     "信息化建设"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市宝安区空海医院开办安防消防设施采购项目招标公告",
@@ -80640,7 +80875,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳职业技术大学深汕校区（设备）智能机器人模块化实验设备招标公告",
@@ -80688,7 +80923,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "【初始合同】深圳市新华医院开办物资（三期）智慧病房移动设备采购项目合同公示",
@@ -81222,7 +81457,7 @@
    "matched_keywords": [
     "信息化建设"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市公安局罗湖分局监控设备采购项目的采购公告",
@@ -81254,7 +81489,7 @@
    "matched_keywords": [
     "视频会议"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市公安局治安管理支队深圳市公安局治安管理支队竹子林营区信息化设施建设项目意向公开",
@@ -81286,7 +81521,7 @@
    "matched_keywords": [
     "多媒体"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "关于深圳市布心中学四楼412教室教室设备 智能化、网络、多媒体设备采购项目的更正公告",
@@ -81302,7 +81537,7 @@
    "matched_keywords": [
     "多媒体"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市标准技术研究院智算服务器采购竞价采购竞价公告(重新采购第2次)",
@@ -81364,10 +81599,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "多媒体",
-    "机房"
+    "多媒体"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "香港中文大学（深圳）存储服务器及GPU服务器购置项目中标（成交）结果公告",
@@ -81432,7 +81666,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "国家税务总局深圳市税务局稽查局深圳税务2026年智慧稽查系统升级完善和运行维护项目公开招标公告",
@@ -81512,7 +81746,7 @@
    "matched_keywords": [
     "会议"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳大学档案馆数据中心设备更新优化项目（A）招标公告(重新采购第2次)",
@@ -81560,7 +81794,7 @@
    "matched_keywords": [
     "数字化"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市龙华区妇幼保健院智慧医疗“114工程”统筹建设信息系统2006年升级服务项目意向公开",
@@ -81853,10 +82087,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "监控",
     "视频"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市布心中学四楼412教室教室设备 智能化、网络、多媒体设备采购项目的采购公告",
@@ -81870,11 +82103,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "智能化",
-    "多媒体",
-    "网络"
+    "多媒体"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市布心中学一楼111教室 智能化、网络、多媒体设备‌采购项目的采购公告",
@@ -81888,11 +82119,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "智能化",
-    "多媒体",
-    "网络"
+    "多媒体"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市儿童医院科教综合楼信息化建设可行性研究报告、初步设计及概算编制服务项目的采购结果公告",
@@ -81906,9 +82135,9 @@
    "source_kind": "政府",
    "province": "广东",
    "matched_keywords": [
-    "信息化"
+    "信息化建设"
    ],
-   "is_new": false
+   "is_new": true
   },
   {
    "title": "深圳市机关事务管理局智慧机关用户管理系统等级保护测评的采购结果公告",
