@@ -648,7 +648,7 @@ def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7):
     回溯天数大时按周分段深挖（深圳接口支持 releaseTimeBegin/End，逐段翻页可覆盖更久历史）；
     单段内翻页直到本页 0 新增或覆盖到段首。
     - 后台表单「最多翻页数」（parse.api_max_pages / 顶层 api_max_pages / page_depth）可覆盖默认深度；
-    - 单站点 800 条上限；连续 3 次请求失败跳过站点；日志打印 站点/段/第X页/本页条数/停止原因。"""
+    - 段级上限 1000 条（本段采满跳到下一段，不漏靠前段）；站点级上限 5000 条；连续 3 次请求失败跳过站点；日志打印 站点/段/第X页/本页条数/停止原因。"""
     api_url = src["api_url"]
     name = src.get("name", src.get("key", "szggzy"))
     parse = dict(src.get("parse") or {})
@@ -676,11 +676,17 @@ def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7):
         ch_name = src["channel_names"].get(ch, str(ch))
         for seg_begin, seg_end in segments:
             seg_seen = set()
+            seg_items = 0
             page = 0
             reached_max = True
             while page < max_pages:
-                if len(items) >= 800:
-                    _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限800条，停止采集\033[0m")
+                # 段级上限：本段已满则跳到下一段（不遗漏靠前的段，如红山这类进行中项目）
+                if seg_items >= 1000:
+                    _log(f"\033[33m[采集] 站点「{name}」[{ch_name}]段[{seg_begin}~{seg_end}]：本段达到1000条上限，继续下一段\033[0m")
+                    break
+                # 站点级上限：整个站点总量保护，防止数据爆炸
+                if len(items) >= 5000:
+                    _log(f"\033[33m[采集] 站点「{name}」：到达单站点上限5000条，停止采集\033[0m")
                     return items
                 body = {
                     "channelId": ch,
@@ -739,6 +745,7 @@ def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7):
                         "area": (it.get("areaName") or "") if isinstance(it, dict) else "",
                         "channel": src["channel_names"].get(ch, ""),
                     })
+                    seg_items += 1
                 _log(f"[采集] 站点「{name}」[{ch_name}]段[{seg_begin}~{seg_end}]：第{page}页 | 本页解析 {page_new} 条")
                 # 本页无新增（已翻完或全是段内重复）→ 该段翻完
                 if page_new == 0:
