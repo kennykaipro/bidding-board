@@ -79,6 +79,7 @@ SOURCES = [
         "name": "中国政府采购网",
         "kind": "政府",
         "base": "http://www.ccgp.gov.cn/cggg/dfgg/",
+        "filter": False,   # 全量收录：不因未命中关键词而漏掉仍在进行（未截标）的项目；搜索/热词仍保留
         "page_depth": 3,
         "columns": [
             ("gkzb", "招标公告"),
@@ -95,6 +96,7 @@ SOURCES = [
         "name": "南方电网供应链统一服务平台",
         "kind": "央企",
         "base": "https://www.bidding.csg.cn/",
+        "filter": False,   # 全量收录（同 ccgp）
         "page_depth": 1,
         "use_requests": True,
         "retries": 1,
@@ -1182,6 +1184,29 @@ def match_stage(title: str, rules=None):
     return "其他"
 
 
+def _months_ago_dash(dt, n):
+    """返回 n 个自然月前的日期（YYYY-MM-DD）。"""
+    y, m = dt.year, dt.month - n
+    while m <= 0:
+        y -= 1
+        m += 12
+    return f"{y:04d}-{m:02d}-{dt.day:02d}"
+
+
+def _keep_result(it, cutoff):
+    """已出最终结果的中标/成交公告（中标结果/成交结果/中标公告/成交公告等）仅保留近 3 个月；
+    中标候选人/评标结果公示等未出最终结果的仍长期收录。规划/招标/更正（含废标/流标）不限。"""
+    if it.get("stage") != "中标":
+        return True
+    d = it.get("date") or ""
+    if d >= cutoff:
+        return True
+    t = it.get("title") or ""
+    if any(w in t for w in ("候选人", "公示", "预中标", "预成交", "拟中标", "拟成交", "评标结果")):
+        return True
+    return False
+
+
 def match_keywords(title: str, keywords=None):
     """按关键词组匹配，返回命中词列表；同义词组内任一词命中即收录。"""
     hits = []
@@ -1217,7 +1242,9 @@ def main():
     cutoff = cutoff_date.strftime("%Y%m%d")
     cutoff_dash = cutoff_date.strftime("%Y-%m-%d")
     end_dash = today.strftime("%Y-%m-%d")
-    print(f"[settings] 日期范围: 近 {days} 天 | 阶段: {stages_selected if stages_selected else '全部'}")
+    # 已出结果的中标/成交公告仅保留近 3 个自然月（结果类情报价值随时间衰减）
+    result_cutoff_dash = _months_ago_dash(today, 3)
+    print(f"[settings] 日期范围: 近 {days} 天 | 阶段: {stages_selected if stages_selected else '全部'} | 中标/成交结果保留: 近3个月")
 
     all_sources = SOURCES + custom_sources + [SZGGZY]
     only_keys = set(k.strip() for k in (args.only or "").split(",") if k.strip()) if args.only else None
@@ -1332,9 +1359,13 @@ def main():
         it["stage"] = stage
         if stages_selected and stage not in stages_selected:
             continue
+        # 已出结果的中标/成交公告仅保留近3个月；规划/招标/更正（含废标流标）/候选人公示全收
+        if not _keep_result(it, result_cutoff_dash):
+            continue
         if it.get("_nofilter"):
             it["province"] = it.get("_src_province", "") or ""
-            it["matched_keywords"] = []
+            # 全量收录但保留关键词标注：命中关键词的仍进热词/搜索，未命中的也不排除
+            it["matched_keywords"] = match_keywords(it["title"], keywords)
             filtered.append(it)
             continue
         prov = match_province(it["title"])
@@ -1370,6 +1401,9 @@ def main():
     merged = {}
     for it in prev_items:
         if isinstance(it, dict) and it.get("title"):
+            # 历史累积同样应用规则：清理超过3个月的已出结果中标/成交公告
+            if not _keep_result(it, result_cutoff_dash):
+                continue
             merged[merge_key(it)] = it
     fresh_keys = set()
     for it in filtered:
