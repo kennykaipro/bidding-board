@@ -49,9 +49,12 @@ def _log(*args):
 
 
 def domain_delay(url: str, min_gap: float = 1.2, max_gap: float = 2.2):
-    """请求前调用：保证同一域名两次请求间隔 >= 随机 [min_gap, max_gap] 秒。"""
+    """请求前调用：保证同一域名两次请求间隔 >= 随机 [min_gap, max_gap] 秒。
+    乙方宝搜索页经实测能承受快速请求（10 连发 0.45s 间隔全部 200），单独提速。"""
     if not url:
         return
+    if "yfbzb.com" in url:
+        min_gap, max_gap = 0.4, 0.7
     try:
         host = urlparse(url).netloc or ""
     except Exception:  # noqa: BLE001
@@ -1719,9 +1722,9 @@ def main():
         fresh_keys.add(merge_key(it))
     # 排序（新的在前），超上限截断保留最近
     merged_items = sorted(merged.values(), key=lambda x: (x.get("date", ""), x.get("source", "")), reverse=True)
-    # 上限 30000：加入乙方宝聚合源后扩容，兼顾收录全与单文件体积
-    if len(merged_items) > 30000:
-        merged_items = merged_items[:30000]
+    # 上限 50000：加入乙方宝聚合源 + 30 天窗口后扩容，兼顾收录全与单文件体积
+    if len(merged_items) > 50000:
+        merged_items = merged_items[:50000]
     filtered = merged_items
 
     # ===== 已见公告库（去重）：历史抓取过的 (title,date) 不再算新增 =====
