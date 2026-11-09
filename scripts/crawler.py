@@ -50,11 +50,14 @@ def _log(*args):
 
 def domain_delay(url: str, min_gap: float = 1.2, max_gap: float = 2.2):
     """请求前调用：保证同一域名两次请求间隔 >= 随机 [min_gap, max_gap] 秒。
-    乙方宝搜索页经实测能承受快速请求（10 连发 0.45s 间隔全部 200），单独提速。"""
+    乙方宝搜索页经实测能承受快速请求（10 连发 0.45s 间隔全部 200），单独提速；
+    深圳地铁响应极快（0.3s）但首连慢，会话复用后按 0.3-0.6s 限速。"""
     if not url:
         return
     if "yfbzb.com" in url:
         min_gap, max_gap = 0.4, 0.7
+    elif "shenzhenmc.com" in url:
+        min_gap, max_gap = 0.3, 0.6
     try:
         host = urlparse(url).netloc or ""
     except Exception:  # noqa: BLE001
@@ -340,24 +343,45 @@ def load_board_config(root: str):
     return settings, keywords, custom_sources
 
 
+_SESSION_CACHE: dict = {}
+
+def _get_cached_session(url: str) -> "requests.Session":
+    """按域名缓存 requests.Session，复用 TCP 连接。
+    解决 cg.shenzhenmc.com 等站点 TCP 首连常卡死（>6s）但会话复用后 0.3s 响应的问题；
+    不同站点隔离，避免 Cookie 状态串扰。"""
+    try:
+        host = urlparse(url).netloc or "default"
+    except Exception:  # noqa: BLE001
+        host = "default"
+    if host not in _SESSION_CACHE:
+        s = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(max_retries=0)
+        s.mount("http://", adapter)
+        s.mount("https://", adapter)
+        _SESSION_CACHE[host] = s
+    return _SESSION_CACHE[host]
+
+
 def fetch_with_requests(url: str, cookies: str = None, retries: int = 3) -> str:
     """基于 requests 的抓取，支持 Cookie 头（登录源）与完整浏览器头。
     单域名限速（1200-2200ms）+ 指数退避重试（403/429/5xx/超时等）。
-    禁用连接级重试（max_retries=0），避免南网等站点在 TCP/TLS 阶段无限重连拖时间。"""
+    禁用连接级重试（max_retries=0），避免南网等站点在 TCP/TLS 阶段无限重连拖时间。
+    深圳地铁 cg.shenzhenmc.com：实测响应 0.3s 但 TCP 首连常卡死（>6s），单独加大超时与重试。"""
     domain_delay(url)
     headers = dict(BROWSER_HEADERS)
     if "bidding.csg.cn" in url:
         headers["Referer"] = "https://www.bidding.csg.cn/"
     if cookies:
         headers["Cookie"] = cookies
-    session = requests.Session()
-    adapter = requests.adapters.HTTPAdapter(max_retries=0)
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
+    _timeout = 6
+    if "shenzhenmc.com" in url:
+        _timeout = 15
+        retries = max(retries, 6)
+    session = _get_cached_session(url)
     last = None
     for attempt in range(1, retries + 1):
         try:
-            resp = session.get(url, headers=headers, timeout=6, verify=False)
+            resp = session.get(url, headers=headers, timeout=_timeout, verify=False)
             resp.raise_for_status()
             if resp.encoding is None or resp.encoding.lower() in ("iso-8859-1",):
                 resp.encoding = "utf-8"
