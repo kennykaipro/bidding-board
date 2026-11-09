@@ -69,7 +69,7 @@
         "date": "p.date",
         "link": "h2 a"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "szygcgpt",
@@ -97,7 +97,7 @@
         "link_template": "/jyxxDetails.htm?bidSectionNumber={bidSectionNumber}&contentId={id}&code={code}",
         "link_prefix": "https://ygcg.szexgrp.com"
       },
-      "filter": false,
+      "filter": true,
       "api_date_begin_field": "releaseTimeBegin",
       "api_date_end_field": "releaseTimeEnd",
       "api_segmented": true,
@@ -119,7 +119,7 @@
         "date": "span.news-time",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "广东"
     },
     {
@@ -132,7 +132,7 @@
       "parse": {
         "type": "css"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "chinaoct",
@@ -144,7 +144,7 @@
       "parse": {
         "type": "css"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "szu",
@@ -160,7 +160,7 @@
         "date": "em",
         "link": "a.flex"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "crcement",
@@ -172,7 +172,7 @@
       "parse": {
         "type": "css"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "job592",
@@ -184,7 +184,7 @@
       "parse": {
         "type": "css"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "szwb_zbgg",
@@ -200,7 +200,7 @@
         "date": "p.date",
         "link": "h2 a"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "zjj_sz",
@@ -216,7 +216,7 @@
         "date": "span.news-date",
         "link": "a[title]"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "cityu_dg",
@@ -228,7 +228,7 @@
       "parse": {
         "type": "css"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "szwb_zbjh",
@@ -244,7 +244,7 @@
         "date": "p.date",
         "link": "h2 a"
       },
-      "filter": false
+      "filter": true
     },
     {
       "key": "bj_ggzyfw",
@@ -254,7 +254,7 @@
       "list_url": "https://ggzyfw.beijing.gov.cn/",
       "page_depth": 1,
       "parse": {},
-      "filter": false,
+      "filter": true,
       "source_province": "北京"
     },
     {
@@ -270,7 +270,7 @@
         "date": "span.date",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "天津"
     },
     {
@@ -286,7 +286,7 @@
         "date": "div.item-time",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "浙江"
     },
     {
@@ -302,7 +302,7 @@
         "date": "span",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "山东"
     },
     {
@@ -318,7 +318,7 @@
         "date": "",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "重庆"
     },
     {
@@ -334,7 +334,7 @@
         "date": "span",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "全国"
     },
     {
@@ -348,7 +348,7 @@
         "type": "regex",
         "pattern": "<a[^>]+href=\"(?P<link>[^\"]+)\"[^>]*class=\"data_jyxx[^\"]*\"[^>]*>\\s*<div>\\s*<span>(?P<title>[^<]+)</span>\\s*<span>(?P<date>[^<]+)</span>"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "山西"
     },
     {
@@ -364,7 +364,7 @@
         "date": "li.date",
         "link": "li.txt a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "重庆"
     },
     {
@@ -381,7 +381,7 @@
         "date": null,
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "安徽"
     },
     {
@@ -398,7 +398,7 @@
         "date": null,
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "宁夏"
     },
     {
@@ -415,7 +415,7 @@
         "date": null,
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "湖北"
     },
     {
@@ -432,7 +432,7 @@
         "date": null,
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "黑龙江"
     },
     {
@@ -449,7 +449,7 @@
         "date": null,
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "吉林"
     },
     {
@@ -499,7 +499,7 @@
         "link_prefix": "http://ggzy.jiangxi.gov.cn",
         "api_referer": "http://ggzy.jiangxi.gov.cn/"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "江西"
     },
     {
@@ -516,7 +516,7 @@
         "date": "span.date",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "新疆"
     },
     {
@@ -566,7 +566,7 @@
         "link_prefix": "https://ggzyjy.sc.gov.cn",
         "api_referer": "https://ggzyjy.sc.gov.cn/jyxx/002001/transactionInfo.html"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "四川"
     },
     {
@@ -614,7 +614,7 @@
         "link_prefix": "http://www.qhggzyjy.gov.cn",
         "api_referer": "http://www.qhggzyjy.gov.cn/ggzy/jyxx/001001/transinfo_list.html"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "青海"
     },
     {
@@ -645,7 +645,7 @@
         "link_prefix": "https://hnsggzyjy.henan.gov.cn",
         "api_referer": "https://hnsggzyjy.henan.gov.cn/"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "河南"
     },
     {
@@ -695,7 +695,7 @@
         "link_prefix": "https://www.sxggzyjy.cn",
         "api_referer": "https://www.sxggzyjy.cn/"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "陕西"
     },
     {
@@ -735,7 +735,7 @@
         "link_template": "https://ggzyfw.fj.gov.cn/business/detail?name={NAME}&cid={M_ID}&type={KIND}",
         "api_referer": "https://ggzyfw.fj.gov.cn/business/list"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "福建"
     },
     {
@@ -775,7 +775,7 @@
         "link_template": "https://ggzyfw.fj.gov.cn/business/detail?name={NAME}&cid={M_ID}&type={KIND}",
         "api_referer": "https://ggzyfw.fj.gov.cn/business/list"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "福建"
     },
     {
@@ -828,7 +828,7 @@
         "link_prefix": "https://jsggzy.jszwfw.gov.cn",
         "api_referer": "https://jsggzy.jszwfw.gov.cn/jyxx/tradeInfonew.html"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "江苏"
     },
     {
@@ -861,7 +861,7 @@
         "link_field": "apiUrl",
         "api_referer": "https://ggzy.guizhou.gov.cn/xxfw/gcjs/"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "贵州"
     },
     {
@@ -894,7 +894,7 @@
         "link_field": "apiUrl",
         "api_referer": "https://ggzy.guizhou.gov.cn/xxfw/zfcg/"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "贵州"
     },
     {
@@ -912,7 +912,7 @@
         "date": "p span.Gray.Right",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "广东"
     },
     {
@@ -930,7 +930,7 @@
         "date": "p span.Gray.Right",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "广东"
     },
     {
@@ -948,7 +948,7 @@
         "date": "p span.Gray.Right",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "广东"
     },
     {
@@ -966,7 +966,7 @@
         "date": "p span.Gray.Right",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "广东"
     },
     {
@@ -984,7 +984,7 @@
         "date": "p span.Gray.Right",
         "link": "a"
       },
-      "filter": false,
+      "filter": true,
       "source_province": "广东"
     }
   ],
