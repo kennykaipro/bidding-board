@@ -1537,6 +1537,35 @@ def match_keywords(title: str, keywords=None):
     return hits
 
 
+# 正文匹配上限：标题未命中关键词时，抓详情页正文做兜底匹配（每源最多 X 条、全局最多 Y 条），
+# 避免 30 天全量窗口下请求量爆炸；正文仍无关键词的公告一律丢弃。
+PER_SOURCE_CONTENT_LIMIT = 40
+GLOBAL_CONTENT_LIMIT = 500
+
+
+def _match_content(url: str, keywords=None):
+    """抓详情页正文，判断是否命中关键词（标题未中时的正文兜底匹配）。
+    只返回命中词列表；抓取失败或正文无关键词返回 []，由调用方决定丢弃。"""
+    if not url or not str(url).startswith("http"):
+        return []
+    try:
+        html = fetch_with_requests(url, retries=2)
+        # 剥掉脚本/样式/头部与标签，得到可检索纯文本
+        text = re.sub(r"(?is)<(script|style|head).*?>.*?</\1>", " ", html)
+        text = re.sub(r"(?s)<[^>]+>", " ", text)
+        text = re.sub(r"\s+", " ", text)
+        hits = []
+        for group in (keywords or []):
+            words = group.get("words", []) or []
+            for w in words:
+                if w and w in text and w not in hits:
+                    hits.append(w)
+                    break
+        return hits
+    except Exception:  # noqa: BLE001
+        return []
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=int, default=None, help="回溯天数（覆盖配置，默认读配置）")
@@ -1675,8 +1704,12 @@ def main():
             seen_td.add(td)
             unique.append(it)
 
-    # 过滤：省份 + 关键词 + 阶段多选
+    # 过滤：关键词（标题/正文）+ 省份 + 阶段多选
+    # 2026-11-09 用户要求：所有源统一按关键词过滤；标题未中时抓详情页正文匹配；
+    # 与关键词无关的公告（如深圳地铁"柴油购置/劳保用品"）一律不再收录。
     filtered = []
+    per_source_checked = {}
+    global_checked = 0
     for it in unique:
         stage = match_stage(it["title"])
         it["stage"] = stage
@@ -1685,21 +1718,24 @@ def main():
         # 已出结果的中标/成交公告仅保留近3个月；规划/招标/更正（含废标流标）/候选人公示全收
         if not _keep_result(it, result_cutoff_dash):
             continue
-        if it.get("_nofilter"):
-            # 解析器已带省份（如乙方宝地区列）时优先使用，否则用源级省份
-            it["province"] = it.get("province") or it.get("_src_province", "") or ""
-            # 全量收录但保留关键词标注：命中关键词的仍进热词/搜索，未命中的也不排除
-            it["matched_keywords"] = match_keywords(it["title"], keywords)
-            filtered.append(it)
-            continue
-        prov = match_province(it["title"])
-        if not prov:
-            continue
+        # 省份：标题内省名优先，否则用源级省份兜底（官方平台标题常不带省名，不再因省份缺失丢弃）
+        it["province"] = match_province(it["title"]) or it.get("_src_province", "") or ""
+        # 关键词：标题命中直接收；标题未中时抓详情页正文兜底匹配
         hits = match_keywords(it["title"], keywords)
+        match_scope = "title"
+        if not hits:
+            src_key = it.get("source", "")
+            per_src = per_source_checked.get(src_key, 0)
+            if per_src < PER_SOURCE_CONTENT_LIMIT and global_checked < GLOBAL_CONTENT_LIMIT:
+                per_source_checked[src_key] = per_src + 1
+                global_checked += 1
+                hits = _match_content(it.get("url", ""), keywords)
+                if hits:
+                    match_scope = "content"
         if not hits:
             continue
-        it["province"] = prov
         it["matched_keywords"] = hits
+        it["match_scope"] = match_scope
         filtered.append(it)
 
     # 乙方宝是聚合补充源：与已有官方源同标题+日期的项目不再重复收录（官方源在前，乙方宝在后）
