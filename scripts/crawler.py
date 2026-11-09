@@ -603,7 +603,8 @@ def fetch_api_json(url: str, body: dict, retries: int = 3, form: bool = False, r
     sign_key 非空时启用福建式签名：body 注入毫秒时间戳 ts，
     对排除空值后的参数按 key 大写排序拼接（对象/数组用 JSON 序列化），
     计算 MD5(密钥+拼接串) 小写作 portal-sign 头。"""
-    domain_delay(url)
+    # API 接口不需要模拟浏览器节奏，缩短同域间隔（0.3-0.6s）以加速高密度分段抓取
+    domain_delay(url, 0.3, 0.6)
     headers = dict(BROWSER_HEADERS)
     if form:
         headers.update({"Content-Type": "application/x-www-form-urlencoded"})
@@ -910,6 +911,73 @@ def parse_custom_source(src, cutoff: str, root: str = "", auto_detect: bool = Tr
     stats["ok"] = sum(1 for it in items if "error" not in it)
     stats["fail"] = sum(1 for it in items if "error" in it)
     return items, stats
+
+
+def parse_yfbzb(src, cutoff_dash: str, end_dash: str, max_pages: int = 150):
+    """乙方宝（yfbzb.com）搜索源：按行业关键词搜索招标公告列表。
+    - 每个关键词从第1页翻页，列表按时间倒序，出现早于截止日期即熔断；
+    - 表格行解析：标题+详情链接 / 公告类型 / 地区 / 发布时间；
+    - 请求使用 fetch_with_requests（浏览器头 + 限速 + 重试），不消耗 AI。"""
+    import urllib.parse
+    name = src.get("name", src["key"])
+    words = src.get("search_words") or []
+    page_size = int(src.get("parse", {}).get("page_size", 30) or 30)
+    items = []
+    for kw in words:
+        before = len(items)
+        base = ("https://www.yfbzb.com/search/invitedBidSearch?defaultSearch=true&keyword="
+                + urllib.parse.quote(kw) + f"&pageNo=1&pageSize={page_size}")
+        consec_empty = 0
+        for page in range(1, max_pages + 1):
+            url = base.replace("pageNo=1", f"pageNo={page}") if page > 1 else base
+            try:
+                html = fetch_with_requests(url)
+            except Exception as exc:  # noqa: BLE001
+                _log(f"\033[31m[采集] 站点「{name}」：关键词「{kw}」第{page}页请求失败：{exc}\033[0m")
+                break
+            soup = BeautifulSoup(html, "lxml")
+            rows = soup.select("table tr")
+            got = 0
+            reached_cutoff = False
+            for tr in rows:
+                tds = tr.find_all("td")
+                if len(tds) < 4:
+                    continue
+                a = tds[0].find("a")
+                if not a:
+                    continue
+                title = a.get_text(strip=True)
+                link = (a.get("href") or "").strip()
+                if not title or not link:
+                    continue
+                d = _normalize_date(tds[3].get_text(strip=True))
+                if not d:
+                    continue
+                if d < cutoff_dash:
+                    reached_cutoff = True
+                    break
+                url = ("https://www.yfbzb.com" + link) if link.startswith("/") else ("https://www.yfbzb.com/" + link)
+                items.append({
+                    "title": title,
+                    "url": url,
+                    "date": d,
+                    "stage": tds[1].get_text(strip=True) or src.get("stage", "公告"),
+                    "province": _province_from_region(tds[2].get_text(strip=True)),
+                    "region": tds[2].get_text(strip=True),
+                })
+                got += 1
+            if reached_cutoff:
+                _log(f"\033[33m[采集] 站点「{name}」：关键词「{kw}」翻到第{page}页出现早于截止日期，熔断\033[0m")
+                break
+            if got == 0:
+                consec_empty += 1
+                if consec_empty >= 2:
+                    _log(f"[采集] 站点「{name}」：关键词「{kw}」连续{consec_empty}页无数据，停止")
+                    break
+            else:
+                consec_empty = 0
+        _log(f"[采集] 站点「{name}」：关键词「{kw}」新增 {len(items) - before} 条")
+    return items
 
 
 def _aes_decrypt_payload(data, key: str, iv: str, encoding: str = "base64"):
@@ -1383,6 +1451,21 @@ def match_province(title: str):
     return None
 
 
+def _province_from_region(region: str):
+    """乙方宝列表的地区列（如 南京建邺区 / 广东茂名 / 全国）映射为省份。"""
+    region = (region or "").strip()
+    if not region or region in ("全国", "跨省", "其他", "-"):
+        return ""
+    for prov in PROVINCES:
+        if region.startswith(prov):
+            return prov
+    for prov, cities in PROVINCES.items():
+        for city in cities:
+            if region.startswith(city):
+                return prov
+    return ""
+
+
 def match_stage(title: str, rules=None):
     """按标题判断公告阶段（规划/招标/中标/更正/其他）。规则按优先级：更正 > 中标 > 规划 > 招标。"""
     for stage, words in (rules or STAGE_RULES):
@@ -1479,6 +1562,11 @@ def main():
                      "fail": sum(1 for e in parsed if "error" in e),
                      "dynamic": False, "ai_calls": 0, "detected": False,
                      "skipped": False, "reused": False}
+        elif key == "yfbzb":
+            parsed = parse_yfbzb(src, cutoff_dash, end_dash)
+            stats = {"ok": len(parsed), "fail": 0,
+                     "dynamic": False, "ai_calls": 0, "detected": False,
+                     "skipped": False, "reused": False}
         else:
             parsed, stats = parse_custom_source(src, cutoff, root, auto_detect)
         return key, parsed, stats
@@ -1571,7 +1659,8 @@ def main():
         if not _keep_result(it, result_cutoff_dash):
             continue
         if it.get("_nofilter"):
-            it["province"] = it.get("_src_province", "") or ""
+            # 解析器已带省份（如乙方宝地区列）时优先使用，否则用源级省份
+            it["province"] = it.get("province") or it.get("_src_province", "") or ""
             # 全量收录但保留关键词标注：命中关键词的仍进热词/搜索，未命中的也不排除
             it["matched_keywords"] = match_keywords(it["title"], keywords)
             filtered.append(it)
@@ -1585,6 +1674,17 @@ def main():
         it["province"] = prov
         it["matched_keywords"] = hits
         filtered.append(it)
+
+    # 乙方宝是聚合补充源：与已有官方源同标题+日期的项目不再重复收录（官方源在前，乙方宝在后）
+    seen_td_final = set()
+    filtered_dedup = []
+    for it in filtered:
+        td = (it["title"], it.get("date", ""))
+        if it.get("source") == "yfbzb" and td in seen_td_final:
+            continue
+        seen_td_final.add(td)
+        filtered_dedup.append(it)
+    filtered = filtered_dedup
 
     filtered.sort(key=lambda x: (x["date"], x["source"]), reverse=True)
 
@@ -1619,8 +1719,9 @@ def main():
         fresh_keys.add(merge_key(it))
     # 排序（新的在前），超上限截断保留最近
     merged_items = sorted(merged.values(), key=lambda x: (x.get("date", ""), x.get("source", "")), reverse=True)
-    if len(merged_items) > 20000:
-        merged_items = merged_items[:20000]
+    # 上限 30000：加入乙方宝聚合源后扩容，兼顾收录全与单文件体积
+    if len(merged_items) > 30000:
+        merged_items = merged_items[:30000]
     filtered = merged_items
 
     # ===== 已见公告库（去重）：历史抓取过的 (title,date) 不再算新增 =====
