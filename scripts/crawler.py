@@ -671,7 +671,90 @@ def fetch_api_json(url: str, body: dict, retries: int = 3, form: bool = False, r
     raise last
 
 
-def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7):
+def _search_szggzy_keywords(src, cutoff: str, end_date: str, keywords=None):
+    """深圳公共资源交易中心：接口 title 关键词搜索模式。
+    2026-11-09 起启用：用户要求只收录与关键词相关的公告。原按 3 天分段全量拉取
+    在 30 天窗口会产出上万条无关公告（土地/产权/拍卖等），且翻页 400+ 页耗时超限。
+    改为对相关频道（政府采购/建设工程）逐个关键词 title 搜索，接口层只返回标题含关键词的公告。
+    返回与 parse_szggzy 相同结构的条目列表。"""
+    api_url = src["api_url"]
+    name = src.get("name", src.get("key", "szggzy"))
+    channels = [2850, 2851]  # 政府采购 / 建设工程（用户业务最相关；土地矿业/产权/拍卖等不收录）
+    max_pages = 4
+    items = []
+    seen = set()
+    words = []
+    for g in (keywords or []):
+        for w in g.get("words", []) or []:
+            if w and w not in words:
+                words.append(w)
+    cutoff_num = cutoff.replace("-", "")
+    end_plus = (datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    consec_fail = 0
+    for ch in channels:
+        ch_name = src["channel_names"].get(ch, str(ch))
+        for kw in words:
+            page = 0
+            while page < max_pages:
+                body = {
+                    "channelId": ch,
+                    "fields": [],
+                    "title": kw,
+                    "releaseTimeBegin": cutoff,
+                    "releaseTimeEnd": end_plus,
+                    "page": page,
+                    "size": 100,
+                }
+                try:
+                    data = fetch_api_json(api_url, body)
+                except Exception as exc:  # noqa: BLE001
+                    consec_fail += 1
+                    _log(f"\033[31m[采集] 站点「{name}」[{ch_name}][关键词:{kw}]第{page}页请求失败（连续 {consec_fail}/3）：{exc}\033[0m")
+                    if consec_fail >= 3:
+                        _log(f"\033[31m[采集] 站点「{name}」：连续3次请求失败，跳过该站点\033[0m")
+                        return items
+                    break
+                consec_fail = 0
+                content = (data or {}).get("data", {}).get("content", []) or []
+                if not content:
+                    break
+                page_new = 0
+                for it in content:
+                    title = it.get("title") or ""
+                    if not title:
+                        continue
+                    date = str(it.get("releaseTime") or "")[:10]
+                    if date and date.replace("-", "") < cutoff_num:
+                        continue
+                    key = (title.strip(), date)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    page_new += 1
+                    href = it.get("linkTo") or ""
+                    if not href:
+                        cid = it.get("contentId") or it.get("id") or ""
+                        if cid:
+                            href = f"https://www.szggzy.com/jygg/details.html?contentId={cid}"
+                    if href and not href.startswith("http"):
+                        href = "https://www.szggzy.com/" + href.lstrip("/")
+                    items.append({
+                        "title": title.strip(),
+                        "url": href,
+                        "date": date,
+                        "stage": src["channel_names"].get(ch, "公告"),
+                        "area": (it.get("areaName") or "") if isinstance(it, dict) else "",
+                        "channel": ch_name,
+                    })
+                _log(f"[采集] 站点「{name}」[{ch_name}][关键词:{kw}]第{page}页 | 本页解析 {page_new} 条")
+                if page_new == 0:
+                    break
+                page += 1
+                time.sleep(0.2 + random.random() * 0.3)
+    return items
+
+
+def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7, keywords=None):
     """深圳公共资源交易中心 JSON API 源。日期范围用接口参数精确控制，分页拉取。
     回溯天数大时按周分段深挖（深圳接口支持 releaseTimeBegin/End，逐段翻页可覆盖更久历史）；
     单段内翻页直到本页 0 新增或覆盖到段首。
@@ -679,6 +762,9 @@ def parse_szggzy(src, cutoff: str, end_date: str, days: int = 7):
     - 段级上限 1000 条（本段采满跳到下一段，不漏靠前段）；站点级上限 5000 条；连续 3 次请求失败跳过站点；日志打印 站点/段/第X页/本页条数/停止原因。"""
     api_url = src["api_url"]
     name = src.get("name", src.get("key", "szggzy"))
+    # 关键词过滤模式下直接用接口 title 搜索（只收标题含关键词的公告，速度快、无无关数据）
+    if keywords:
+        return _search_szggzy_keywords(src, cutoff, end_date, keywords)
     parse = dict(src.get("parse") or {})
     max_pages = int(parse.get("api_max_pages") or src.get("api_max_pages") or src.get("page_depth")
                     or dynamic_depth(days) or 5)
@@ -1543,9 +1629,16 @@ PER_SOURCE_CONTENT_LIMIT = 40
 GLOBAL_CONTENT_LIMIT = 500
 
 
+# 正文匹配黑名单：这些词在公告正文中过于常见（会议/视频/音频/显示/数字化等可出现在任何项目正文），
+# 仅靠它们命中会误收无关项目（如农田/土地/物业/公路/政务新闻），因此正文兜底匹配时跳过；
+# 标题匹配不受影响（标题含"会议系统/视频监控/数字化平台"等项目名仍正常收录）。
+CONTENT_BLOCK_WORDS = {"会议", "视频", "音频", "显示", "数字化"}
+
+
 def _match_content(url: str, keywords=None):
     """抓详情页正文，判断是否命中关键词（标题未中时的正文兜底匹配）。
-    只返回命中词列表；抓取失败或正文无关键词返回 []，由调用方决定丢弃。"""
+    只返回命中词列表；抓取失败或正文无关键词返回 []，由调用方决定丢弃。
+    宽泛词（CONTENT_BLOCK_WORDS）在正文中不作为命中依据，避免误收无关项目。"""
     if not url or not str(url).startswith("http"):
         return []
     try:
@@ -1558,6 +1651,8 @@ def _match_content(url: str, keywords=None):
         for group in (keywords or []):
             words = group.get("words", []) or []
             for w in words:
+                if w in CONTENT_BLOCK_WORDS:
+                    continue
                 if w and w in text and w not in hits:
                     hits.append(w)
                     break
@@ -1571,6 +1666,8 @@ def main():
     ap.add_argument("--days", type=int, default=None, help="回溯天数（覆盖配置，默认读配置）")
     ap.add_argument("--out-dir", default=None, help="输出目录（默认脚本上级目录）")
     ap.add_argument("--only", default=None, help="只抓指定源（逗号分隔 key）")
+    ap.add_argument("--no-history", action="store_true",
+                    help="重建模式：不合并历史 data.json，仅输出本次抓取+关键词过滤结果（用于清理历史无关数据）")
     args = ap.parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -1613,7 +1710,7 @@ def main():
                      "dynamic": False, "ai_calls": 0, "detected": False,
                      "skipped": False, "reused": False}
         elif key == "szggzy":
-            parsed = parse_szggzy(src, cutoff_dash, end_dash, days)
+            parsed = parse_szggzy(src, cutoff_dash, end_dash, days, keywords)
             stats = {"ok": sum(1 for e in parsed if "error" not in e),
                      "fail": sum(1 for e in parsed if "error" in e),
                      "dynamic": False, "ai_calls": 0, "detected": False,
@@ -1705,9 +1802,10 @@ def main():
             unique.append(it)
 
     # 过滤：关键词（标题/正文）+ 省份 + 阶段多选
-    # 2026-11-09 用户要求：所有源统一按关键词过滤；标题未中时抓详情页正文匹配；
+    # 2026-11-09 用户要求：所有源统一按关键词过滤；标题未中时抓详情页正文匹配（4 线程并发，纯规则 0 积分）；
     # 与关键词无关的公告（如深圳地铁"柴油购置/劳保用品"）一律不再收录。
     filtered = []
+    content_pending = []
     per_source_checked = {}
     global_checked = 0
     for it in unique:
@@ -1720,23 +1818,30 @@ def main():
             continue
         # 省份：标题内省名优先，否则用源级省份兜底（官方平台标题常不带省名，不再因省份缺失丢弃）
         it["province"] = match_province(it["title"]) or it.get("_src_province", "") or ""
-        # 关键词：标题命中直接收；标题未中时抓详情页正文兜底匹配
+        # 关键词：标题命中直接收；标题未中时进正文检查队列（每源/全局限量）
         hits = match_keywords(it["title"], keywords)
-        match_scope = "title"
-        if not hits:
-            src_key = it.get("source", "")
-            per_src = per_source_checked.get(src_key, 0)
-            if per_src < PER_SOURCE_CONTENT_LIMIT and global_checked < GLOBAL_CONTENT_LIMIT:
-                per_source_checked[src_key] = per_src + 1
-                global_checked += 1
-                hits = _match_content(it.get("url", ""), keywords)
-                if hits:
-                    match_scope = "content"
-        if not hits:
+        if hits:
+            it["matched_keywords"] = hits
+            it["match_scope"] = "title"
+            filtered.append(it)
             continue
-        it["matched_keywords"] = hits
-        it["match_scope"] = match_scope
-        filtered.append(it)
+        src_key = it.get("source", "")
+        per_src = per_source_checked.get(src_key, 0)
+        if per_src < PER_SOURCE_CONTENT_LIMIT and global_checked < GLOBAL_CONTENT_LIMIT:
+            per_source_checked[src_key] = per_src + 1
+            global_checked += 1
+            content_pending.append(it)
+    # 并发抓详情页正文做兜底匹配（正文仍无关键词的不收录）
+    if content_pending:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:
+            futs = {ex.submit(_match_content, it.get("url", ""), keywords): it for it in content_pending}
+            for fut in concurrent.futures.as_completed(futs):
+                it = futs[fut]
+                hits = fut.result()
+                if hits:
+                    it["matched_keywords"] = hits
+                    it["match_scope"] = "content"
+                    filtered.append(it)
 
     # 乙方宝是聚合补充源：与已有官方源同标题+日期的项目不再重复收录（官方源在前，乙方宝在后）
     seen_td_final = set()
@@ -1770,16 +1875,23 @@ def main():
         except Exception:
             prev_items = []
     merged = {}
-    for it in prev_items:
-        if isinstance(it, dict) and it.get("title"):
-            # 历史累积同样应用规则：清理超过3个月的已出结果中标/成交公告
-            if not _keep_result(it, result_cutoff_dash):
-                continue
+    if args.no_history:
+        # 重建模式：不读历史 data.json，仅用本次过滤结果（清理历史无关数据后首跑使用）
+        fresh_keys = set()
+        for it in filtered:
             merged[merge_key(it)] = it
-    fresh_keys = set()
-    for it in filtered:
-        merged[merge_key(it)] = it
-        fresh_keys.add(merge_key(it))
+            fresh_keys.add(merge_key(it))
+    else:
+        for it in prev_items:
+            if isinstance(it, dict) and it.get("title"):
+                # 历史累积同样应用规则：清理超过3个月的已出结果中标/成交公告
+                if not _keep_result(it, result_cutoff_dash):
+                    continue
+                merged[merge_key(it)] = it
+        fresh_keys = set()
+        for it in filtered:
+            merged[merge_key(it)] = it
+            fresh_keys.add(merge_key(it))
     # 排序（新的在前），超上限截断保留最近
     merged_items = sorted(merged.values(), key=lambda x: (x.get("date", ""), x.get("source", "")), reverse=True)
     # 上限 50000：加入乙方宝聚合源 + 30 天窗口后扩容，兼顾收录全与单文件体积
