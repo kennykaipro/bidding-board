@@ -204,19 +204,21 @@
     },
     {
       "key": "zjj_sz",
-      "name": "深圳市住房和建设局",
+      "name": "深圳市住建局·建设监督通知公告",
       "kind": "政府",
       "stage": "公告",
-      "list_url": "http://zjj.sz.gov.cn/",
-      "page_depth": 1,
+      "list_url": "https://zjj.sz.gov.cn/xxgk/ztzl/jsjd/tzgg/index.html",
+      "page_depth": 6,
       "parse": {
         "type": "css",
-        "item": "ul.news-list > li",
+        "item": "ul.ftdt-list > li",
         "title": "a[title]",
-        "date": "span.news-date",
+        "date": "span",
         "link": "a[title]"
       },
-      "filter": true
+      "filter": false,
+      "page_url_pattern": "https://zjj.sz.gov.cn/xxgk/ztzl/jsjd/tzgg/index_{page}.html",
+      "days": 365
     },
     {
       "key": "cityu_dg",
