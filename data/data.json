@@ -1,12 +1,12 @@
 {
- "generated_at": "2026-11-27 09:44",
+ "generated_at": "2026-11-27 22:52",
  "window_days": 1,
  "settings": {
   "date_range_days": 1,
   "stages": [],
   "auto_detect": true
  },
- "total": 2472,
+ "total": 2482,
  "new_count": 84,
  "ai_stats": {
   "ai_calls": 1,
@@ -247,6 +247,91 @@
    "is_new": true
   },
   {
+   "title": "2026年基层治理数字化平台运营服务采购结果公告",
+   "url": "https://zfcg.szggzy.com:8084/gsgg/002001/002001008/002001008002/20261127/11db6a39-61e7-4747-b2e3-70d47d9e9841.html",
+   "date": "2026-11-27",
+   "stage": "中标",
+   "area": "光明区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "",
+   "matched_keywords": [
+    "数字化"
+   ],
+   "match_scope": "title",
+   "is_new": true
+  },
+  {
+   "title": "深圳市龙岗区第三人民医院数字化手术室采购（A）招标公告",
+   "url": "https://zfcg.szggzy.com:8084/gsgg/002001/002001002/002001002001/20261127/7ea1846e-60d6-4bc0-940e-5e68bc23cab7.html",
+   "date": "2026-11-27",
+   "stage": "招标",
+   "area": "龙岗区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "数字化"
+   ],
+   "match_scope": "title",
+   "is_new": true
+  },
+  {
+   "title": "深圳市人力资源和社会保障数据管理中心市人力资源保障局数字化总体设计项目(2026年)意向公开",
+   "url": "https://zfcg.szggzy.com:8084/gsgg/002001/002001001/002001001002/20261127/e1eeac79-ca5f-4251-811c-105759163940.html",
+   "date": "2026-11-27",
+   "stage": "规划",
+   "area": "市本级",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "广东",
+   "matched_keywords": [
+    "数字化"
+   ],
+   "match_scope": "title",
+   "is_new": true
+  },
+  {
+   "title": "沙井街道共和社区广场舞定向音响采购项目的采购结果公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20773501",
+   "date": "2026-11-27",
+   "stage": "中标",
+   "area": "宝安区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "",
+   "matched_keywords": [
+    "音响"
+   ],
+   "match_scope": "title",
+   "is_new": true
+  },
+  {
+   "title": "采购黄木岗社康排队叫号显示系统及自助机项目的采购公告",
+   "url": "https://www.szggzy.com/jygg/details.html?contentId=20776038",
+   "date": "2026-11-27",
+   "stage": "招标",
+   "area": "福田区",
+   "channel": "政府采购",
+   "source": "szggzy",
+   "source_name": "深圳公共资源交易中心",
+   "source_kind": "政府",
+   "province": "",
+   "matched_keywords": [
+    "显示"
+   ],
+   "match_scope": "title",
+   "is_new": true
+  },
+  {
    "title": "云南大学附属医院业务用房（病房）综合提升改造项目弱电智能...",
    "url": "https://www.ggzy.gov.cn/information/deal/html/a/530000/0101/20261127/00538a51cd7d3bcb47bdb69a3fc71601adac.html",
    "date": "2026-11-27",
@@ -259,7 +344,7 @@
     "智能化工程"
    ],
    "match_scope": "content",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "[电子化][公开招标]吉林省政务服务和数字化建设服务中心-2026年省级政务信息化运维项目（网络链路租赁）标段二",
@@ -442,7 +527,7 @@
     "智能化工程"
    ],
    "match_scope": "content",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "立思辰鼓组件零星采购公告",
@@ -458,6 +543,42 @@
    "province": "",
    "matched_keywords": [
     "系统集成"
+   ],
+   "match_scope": "content",
+   "is_new": false
+  },
+  {
+   "title": "云南电网有限责任公司2026-2029年输变电专业第一批服务类框架采购（公开招标）中标候选人公示",
+   "url": "https://www.bidding.csg.cn/zbhxrgs/1200452092.jhtml",
+   "date": "2026-11-27",
+   "stage": "中标",
+   "buyer": "云南电网公司",
+   "source": "csg",
+   "source_name": "南方电网供应链统一服务平台",
+   "source_kind": "央企",
+   "_nofilter": true,
+   "_src_province": "",
+   "province": "云南",
+   "matched_keywords": [
+    "音视频"
+   ],
+   "match_scope": "content",
+   "is_new": true
+  },
+  {
+   "title": "云南电网有限责任公司2026-2027年市场营销服务类第一批框架采购（公开询比采购）成交候选人公示",
+   "url": "https://www.bidding.csg.cn/zbhxrgs/1200452113.jhtml",
+   "date": "2026-11-27",
+   "stage": "中标",
+   "buyer": "云南电网公司",
+   "source": "csg",
+   "source_name": "南方电网供应链统一服务平台",
+   "source_kind": "央企",
+   "_nofilter": true,
+   "_src_province": "",
+   "province": "云南",
+   "matched_keywords": [
+    "音视频"
    ],
    "match_scope": "content",
    "is_new": true
@@ -505,7 +626,7 @@
     "多功能"
    ],
    "match_scope": "title",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "【西城区】[S110000C005111734002]2026年设备新购-北京市第七中学-教育教学设备购置教学仪器采购项目（Led全彩屏+礼堂音响设备+会议室配套设备）公开招标公告更正公告",
@@ -548,6 +669,51 @@
    "province": "北京",
    "matched_keywords": [
     "多功能"
+   ],
+   "match_scope": "content",
+   "is_new": true
+  },
+  {
+   "title": "【海淀区】[S110000A001036324044]海淀区东升镇北部片区朱房四街棚户区改造项目一期（安置房用地）（10#地块）电子与智能化工程施工资格预审公告",
+   "url": "https://ggzyfw.beijing.gov.cn/jyxxggjtbyqs/20261127/5804512.html",
+   "date": "2026-11-27",
+   "stage": "其他",
+   "source": "bj_ggzyfw",
+   "source_name": "北京市公共资源交易服务平台",
+   "source_kind": "政府",
+   "province": "北京",
+   "matched_keywords": [
+    "智能化工程"
+   ],
+   "match_scope": "title",
+   "is_new": true
+  },
+  {
+   "title": "【海淀区】[S110000A001036324043]海淀区东升镇北部片区朱房四街棚户区改造项目一期(安置房用地)(09-1#住宅楼等31项)-电子与智能化工程施工资格预审公告",
+   "url": "https://ggzyfw.beijing.gov.cn/jyxxggjtbyqs/20261127/5804511.html",
+   "date": "2026-11-27",
+   "stage": "其他",
+   "source": "bj_ggzyfw",
+   "source_name": "北京市公共资源交易服务平台",
+   "source_kind": "政府",
+   "province": "北京",
+   "matched_keywords": [
+    "智能化工程"
+   ],
+   "match_scope": "title",
+   "is_new": true
+  },
+  {
+   "title": "【石景山区】[S110000A001043342003]老山街道区域养老服务中心项目装修改造工程施工招标公告",
+   "url": "https://ggzyfw.beijing.gov.cn/jyxxgcjsgzgg/20261127/5804703.html",
+   "date": "2026-11-27",
+   "stage": "招标",
+   "source": "bj_ggzyfw",
+   "source_name": "北京市公共资源交易服务平台",
+   "source_kind": "政府",
+   "province": "北京",
+   "matched_keywords": [
+    "智能化工程"
    ],
    "match_scope": "content",
    "is_new": true
@@ -1239,7 +1405,7 @@
     "智能化工程"
    ],
    "match_scope": "title",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "2026年南方电网人工智能科技有限公司自主品牌智能会议一体机代工生产及零部件框架公开招标采购项...",
@@ -1257,7 +1423,7 @@
     "会议"
    ],
    "match_scope": "title",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "2026年南方电网数据平台与安全（广东）有限公司安全服务平台组件及密码平台运营优化服务等2个标...",
@@ -1275,7 +1441,7 @@
     "数据平台"
    ],
    "match_scope": "title",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "2026年南方电网数据平台与安全（广东）有限公司终端加固技术服务采购项目公开谈判采购公告",
@@ -1293,7 +1459,7 @@
     "数据平台"
    ],
    "match_scope": "title",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "2026年南方电网数字电网集团（广东）有限公司智能网管关键技术服务、基于人工智能的源代码审计技...",
@@ -1311,7 +1477,7 @@
     "智能化工程"
    ],
    "match_scope": "content",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "贵州电网有限责任公司物资类2026年第三批（针型冷压接线头）公开谈判采购公告",
@@ -1329,7 +1495,7 @@
     "数据平台"
    ],
    "match_scope": "content",
-   "is_new": true
+   "is_new": false
   },
   {
    "title": "成都(金堂)蔬菜保供基地智慧园区建设项目监理招标文件.CDZ",
