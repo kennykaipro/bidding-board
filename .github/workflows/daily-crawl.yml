@@ -1,6 +1,10 @@
 name: 每日抓取招投标数据
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'data/data.json'
   schedule:
     - cron: '0 22 * * *' # UTC 22:00 = 北京时间 06:00
   workflow_dispatch:
